@@ -117,7 +117,7 @@ Run `git diff` and present. **Stop.**
 3. Batch-resolve GitHub threads via `mcp__plugin_github_github__add_reply_to_pull_request_comment`:
    - **ACCEPT**: reply `"Fixed. [brief description]"` → resolve thread
    - **PARTLY_ACCEPT**: reply with what changed and what didn't → resolve thread
-   - **PUSHBACK**: post approved reply text → leave thread unresolved
+   - **PUSHBACK**: post approved reply text → leave thread unresolved **unless reviewer is Copilot** (a bot cannot respond — resolve the thread)
    - **OUTDATED**: reply noting code has changed → resolve thread
 
 ## Red Flags — Stop Immediately
@@ -139,7 +139,8 @@ These thoughts mean you are about to skip an approval gate:
 | Implementing before user approves evaluation | Present table, then STOP at Step 4 |
 | Implementing before user approves plan | STOP at Step 6 |
 | Committing before user reviews diff | STOP at Step 8 |
-| Resolving PUSHBACK threads | Leave open — reviewer must respond |
+| Resolving PUSHBACK threads from humans | Leave open — reviewer must respond |
+| Leaving PUSHBACK threads open when reviewer is Copilot | Copilot is a bot and cannot respond — always resolve its threads after posting reply |
 | Reading files in controller during evaluation | Delegate entirely to subagent |
 | Accepting all feedback because reviewer is senior | Still verify — see `superpowers:receiving-code-review` |
 | Treating "resolve all comments before merge" as "implement all suggestions" | Resolution = disposition, not blind implementation |
