@@ -1,0 +1,12 @@
+{
+  "name": "explore-haiku",
+  "version": "1.0.0",
+  "description": "Overrides Claude Code's built-in Explore agent to always run on Haiku instead of inheriting the session model, keeping everything else the same.",
+  "author": {
+    "name": "Cory Hanson"
+  },
+  "homepage": "https://github.com/chansonbiltd/personal-claude-setups/tree/main/plugins/explore-haiku",
+  "repository": "https://github.com/chansonbiltd/personal-claude-setups",
+  "license": "MIT",
+  "keywords": ["agent", "explore", "haiku", "model-override"]
+}
