@@ -1,0 +1,16 @@
+{
+  "name": "personal-claude-setups",
+  "description": "Cory Hanson's personal Claude Code plugins.",
+  "owner": {
+    "name": "Cory Hanson"
+  },
+  "plugins": [
+    {
+      "name": "resolve-pr-feedback",
+      "description": "Systematically fetch, evaluate, and resolve GitHub PR review feedback with explicit human approval gates before any changes are made.",
+      "source": "./plugins/resolve-pr-feedback",
+      "category": "productivity",
+      "homepage": "https://github.com/chansonbiltd/personal-claude-setups/tree/main/plugins/resolve-pr-feedback"
+    }
+  ]
+}

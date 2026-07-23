@@ -6,12 +6,12 @@ Use this template when dispatching the implementer subagent in Step 7.
 
 ```
 Agent tool:
-  subagent_type: pr-feedback-implementer
+  subagent_type: resolve-pr-feedback:pr-feedback-implementer
   description: "Implement approved PR feedback changes"
   prompt: [fill template below with actual values]
 ```
 
-`pr-feedback-implementer` is a custom subagent (`.claude/agents/pr-feedback-implementer.md`) pinned to `model: sonnet` and `effort: low` in its frontmatter — that's where the model/effort are actually enforced, not on this dispatch call.
+`resolve-pr-feedback:pr-feedback-implementer` is a custom subagent (`agents/pr-feedback-implementer.md`, bundled with this plugin) pinned to `model: sonnet` and `effort: low` in its frontmatter — that's where the model/effort are actually enforced, not on this dispatch call. Plugin-provided subagents are namespaced as `<plugin-name>:<agent-name>`.
 
 ## Prompt Template
 

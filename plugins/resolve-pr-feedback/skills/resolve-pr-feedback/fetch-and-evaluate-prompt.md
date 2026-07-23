@@ -6,12 +6,12 @@ Use this template when dispatching the fetch-and-evaluate subagent in Step 2.
 
 ```
 Agent tool:
-  subagent_type: pr-feedback-evaluator
+  subagent_type: resolve-pr-feedback:pr-feedback-evaluator
   description: "Fetch and evaluate PR #{PR_NUMBER} comments"
   prompt: [fill template below with actual values]
 ```
 
-`pr-feedback-evaluator` is a custom subagent (`.claude/agents/pr-feedback-evaluator.md`) pinned to `model: sonnet` and `effort: high` in its frontmatter — that's where the model/effort are actually enforced, not on this dispatch call.
+`resolve-pr-feedback:pr-feedback-evaluator` is a custom subagent (`agents/pr-feedback-evaluator.md`, bundled with this plugin) pinned to `model: sonnet` and `effort: high` in its frontmatter — that's where the model/effort are actually enforced, not on this dispatch call. Plugin-provided subagents are namespaced as `<plugin-name>:<agent-name>` — verified with a local `--plugin-dir` load with no home-directory copy present.
 
 ## Prompt Template
 

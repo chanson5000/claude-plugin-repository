@@ -1,0 +1,12 @@
+{
+  "name": "resolve-pr-feedback",
+  "version": "1.0.0",
+  "description": "Systematically fetch, evaluate, and resolve GitHub PR review feedback with explicit human approval gates before any changes are made.",
+  "author": {
+    "name": "Cory Hanson"
+  },
+  "homepage": "https://github.com/chansonbiltd/personal-claude-setups/tree/main/plugins/resolve-pr-feedback",
+  "repository": "https://github.com/chansonbiltd/personal-claude-setups",
+  "license": "MIT",
+  "keywords": ["github", "pull-request", "code-review", "git-workflow"]
+}
