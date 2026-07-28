@@ -21,13 +21,18 @@ If the plugin's `SessionStart` sync hook is running, this placement already happ
 
    Do **not** fall back to searching the current directory — that matches a checkout of the plugin's source repo rather than the installed copy.
 
-   Old plugin versions linger in the cache for about two weeks after an update, so this can return several paths. Take the most recently modified one (`ls -t` rather than `find -printf`, which is GNU-only and absent on macOS):
+   Old plugin versions linger in the cache for about two weeks after an update, so this can return several paths. Take the most recently modified one (`ls -t` rather than `find -printf`, which is GNU-only and absent on macOS). Capture the `find` output first and check it's non-empty before piping to `ls -t` — an empty result piped straight into `xargs ls -t` runs `ls -t` with no arguments, which falls back to listing the current directory and silently returns an unrelated file instead of nothing:
 
    ```
-   find ~/.claude/plugins/cache -path '*explore-haiku/*/agents/explore.md' 2>/dev/null | xargs ls -t 2>/dev/null | head -1
+   matches=$(find ~/.claude/plugins/cache -path '*explore-haiku/*/agents/explore.md' 2>/dev/null)
+   if [ -z "$matches" ]; then
+     bundled=""
+   else
+     bundled=$(echo "$matches" | xargs ls -t 2>/dev/null | head -1)
+   fi
    ```
 
-   If nothing is found, stop and tell the user you couldn't locate the bundled agent file, and ask them to confirm the plugin is installed.
+   If `$bundled` is empty, stop and tell the user you couldn't locate the bundled agent file, and ask them to confirm the plugin is installed.
 
 2. Check whether `~/.claude/agents/explore.md` already exists.
    - If it does **not** exist: copy the bundled file's contents there as-is.
