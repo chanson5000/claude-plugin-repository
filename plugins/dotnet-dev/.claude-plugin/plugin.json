@@ -1,0 +1,12 @@
+{
+  "name": "dotnet-dev",
+  "version": "2.0.0",
+  "description": "Skills and subagents for .NET/C# development. Skills carry the authoring conventions Claude must follow inline — API endpoints, Blazor/MudBlazor components, xUnit tests, database migrations, Serilog logging. Agents handle delegated sweeps — security review, logging audit, feature-flag removal, documentation.",
+  "author": {
+    "name": "Cory Hanson"
+  },
+  "homepage": "https://github.com/chanson5000/claude-plugin-repository/tree/main/plugins/dotnet-dev",
+  "repository": "https://github.com/chanson5000/claude-plugin-repository",
+  "license": "MIT",
+  "keywords": ["dotnet", "csharp", "blazor", "mudblazor", "efcore", "serilog", "xunit", "skills", "agents"]
+}

@@ -10,7 +10,7 @@ A systematic multi-step workflow for resolving GitHub PR review comments with ex
 ## Install
 
 ```
-/plugin marketplace add chansonbiltd/personal-claude-setups
+/plugin marketplace add chanson5000/claude-plugin-repository
 /plugin install resolve-pr-feedback@personal-claude-setups
 ```
 
