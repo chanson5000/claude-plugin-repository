@@ -33,19 +33,29 @@ plugins/
 ├── explore-haiku/
 │   ├── .claude-plugin/plugin.json
 │   ├── agents/explore.md
-│   ├── skills/activate-haiku-explore/SKILL.md
+│   ├── hooks/
+│   │   ├── hooks.json
+│   │   └── sync-explore-agent.sh
+│   ├── skills/
+│   │   ├── activate-haiku-explore/SKILL.md
+│   │   └── deactivate-haiku-explore/SKILL.md
 │   └── README.md
-└── dotnet-dev-agents/
+└── dotnet-dev/
     ├── .claude-plugin/plugin.json
     ├── agents/
-    │   ├── api-developer.md
-    │   ├── blazor-developer.md
-    │   ├── database-migration-specialist.md
     │   ├── documentation-writer.md
     │   ├── feature-flag-remover.md
-    │   ├── logging-specialist.md
-    │   ├── security-reviewer.md
-    │   └── test-coverage-engineer.md
+    │   ├── logging-auditor.md
+    │   └── security-reviewer.md
+    ├── skills/
+    │   ├── api-conventions/SKILL.md
+    │   ├── blazor-components/
+    │   │   ├── SKILL.md
+    │   │   └── references/patterns.md
+    │   ├── db-migrations/SKILL.md
+    │   ├── remove-feature-flag/SKILL.md
+    │   ├── serilog-logging/SKILL.md
+    │   └── test-conventions/SKILL.md
     └── README.md
 ```
 
@@ -71,26 +81,35 @@ Overrides Claude Code's built-in `Explore` agent so it always runs on Haiku inst
 
 See [`plugins/explore-haiku/README.md`](./plugins/explore-haiku/README.md) — installing requires a one-time activation step, explained there.
 
-### `dotnet-dev-agents`
+### `dotnet-dev`
 
-Domain-specific subagents for .NET/C# development: API design, Blazor/MudBlazor components, EF Core migrations, Serilog logging, security review, feature-flag removal, xUnit test coverage, and Markdown documentation.
+Skills and subagents for .NET/C# development, targeting .NET 10+, Blazor, MudBlazor, EF Core, xUnit, and Serilog.
 
 ```
-/plugin install dotnet-dev-agents@personal-claude-setups
+/plugin install dotnet-dev@personal-claude-setups
 ```
 
-| Agent | Purpose |
+The split between the two kinds is deliberate: a subagent's prompt exists only inside that subagent's context, so **authoring conventions have to be skills** — encoded as agents they would go unenforced every time Claude writes the code itself instead of delegating. Agents are reserved for delegated jobs that return a report or a self-contained changeset.
+
+| Skill | Load it when |
 |---|---|
-| `api-developer` | RESTful API design, conventions, error handling, and security |
-| `blazor-developer` | Blazor components with MudBlazor |
-| `database-migration-specialist` | Safe DB schema migrations (DbUp, EF Core, FluentMigrator) |
-| `documentation-writer` | Structured Markdown documentation |
-| `feature-flag-remover` | Safely removing deprecated feature flags and their conditional logic |
-| `logging-specialist` | Structured Serilog logging with Application Insights integration |
-| `security-reviewer` | OWASP Top 10 security reviews and fixes |
-| `test-coverage-engineer` | xUnit / Shouldly / BUnit / Moq test authoring |
+| `api-conventions` | Writing or changing an ASP.NET Core endpoint or the service behind it |
+| `blazor-components` | Editing a `.razor` file — includes the lifecycle traps behind duplicate init and WASM leaks |
+| `test-conventions` | Writing any xUnit or BUnit test |
+| `db-migrations` | Adding or changing schema, before writing the script |
+| `serilog-logging` | Adding or changing a log statement |
+| `remove-feature-flag` | `/remove-feature-flag <FlagName>` — drives the removal agent behind a diff gate |
 
-See [`plugins/dotnet-dev-agents/README.md`](./plugins/dotnet-dev-agents/README.md).
+| Agent | Edits code? | Purpose |
+|---|---|---|
+| `security-reviewer` | No | .NET-aware vulnerability sweep, authorization-first |
+| `logging-auditor` | No | Finds logging gaps, wrong levels, leaked sensitive data |
+| `feature-flag-remover` | Yes, no commit | Collapses a rolled-out flag across code, markup, and tests |
+| `documentation-writer` | Yes | Markdown docs as a self-contained deliverable |
+
+> Renamed from `dotnet-dev-agents` in v2.0.0 — uninstall the old plugin before installing this one.
+
+See [`plugins/dotnet-dev/README.md`](./plugins/dotnet-dev/README.md).
 
 ## License
 

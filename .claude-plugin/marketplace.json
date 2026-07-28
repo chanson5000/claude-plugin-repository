@@ -20,11 +20,11 @@
       "homepage": "https://github.com/chanson5000/claude-plugin-repository/tree/main/plugins/explore-haiku"
     },
     {
-      "name": "dotnet-dev-agents",
-      "description": "Domain-specific subagents for .NET/C# development: API design, Blazor/MudBlazor components, EF Core migrations, Serilog logging, security review, feature-flag removal, xUnit test coverage, and Markdown documentation.",
-      "source": "./plugins/dotnet-dev-agents",
+      "name": "dotnet-dev",
+      "description": "Skills and subagents for .NET/C# development. Skills carry the authoring conventions Claude must follow inline — API endpoints, Blazor/MudBlazor components, xUnit tests, database migrations, Serilog logging. Agents handle delegated sweeps — security review, logging audit, feature-flag removal, documentation.",
+      "source": "./plugins/dotnet-dev",
       "category": "productivity",
-      "homepage": "https://github.com/chanson5000/claude-plugin-repository/tree/main/plugins/dotnet-dev-agents"
+      "homepage": "https://github.com/chanson5000/claude-plugin-repository/tree/main/plugins/dotnet-dev"
     }
   ]
 }
