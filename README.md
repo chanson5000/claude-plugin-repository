@@ -1,90 +1,96 @@
-# personal-claude-setups
+# claude-plugin-repository
 
-Personal [Claude Code](https://claude.ai/code) configurations, agents, and skills used across my projects. Shared for reference and reuse.
+A Claude Code plugin marketplace: installable agents and skills for .NET/C# development and general workflow automation.
 
-These examples of my [Claude home directory](https://code.claude.com/docs/en/claude-directory). `~/.claude`
+## Install the marketplace
+
+```
+/plugin marketplace add chanson5000/claude-plugin-repository
+```
+
+Then install any plugin below, e.g.:
+
+```
+/plugin install resolve-pr-feedback@personal-claude-setups
+```
 
 ## Contents
 
 ```
-.claude/
-├── CLAUDE.md                          # Personal environment instructions
-├── settings.json                      # Model, plugins, and statusline config
-├── statusline-command.sh              # Custom statusline script
-├── agents/
-│   ├── api-developer.md
-│   ├── blazor-developer.md
-│   ├── database-migration-specialist.md
-│   ├── documentation-writer.md
-│   ├── feature-flag-remover.md
-│   ├── logging-specialist.md
-│   ├── pr-feedback-evaluator.md
-│   ├── pr-feedback-implementer.md
-│   ├── security-reviewer.md
-│   └── test-coverage-engineer.md
-└── skills/
-    └── resolve-pr-feedback/
-        └── SKILL.md
+.claude-plugin/
+└── marketplace.json                   # Marketplace manifest
+plugins/
+├── resolve-pr-feedback/
+│   ├── .claude-plugin/plugin.json
+│   ├── agents/
+│   │   ├── pr-feedback-evaluator.md
+│   │   └── pr-feedback-implementer.md
+│   ├── skills/resolve-pr-feedback/
+│   │   ├── SKILL.md
+│   │   ├── fetch-and-evaluate-prompt.md
+│   │   └── implementer-prompt.md
+│   └── README.md
+├── explore-haiku/
+│   ├── .claude-plugin/plugin.json
+│   ├── agents/explore.md
+│   ├── skills/activate-haiku-explore/SKILL.md
+│   └── README.md
+└── dotnet-dev-agents/
+    ├── .claude-plugin/plugin.json
+    ├── agents/
+    │   ├── api-developer.md
+    │   ├── blazor-developer.md
+    │   ├── database-migration-specialist.md
+    │   ├── documentation-writer.md
+    │   ├── feature-flag-remover.md
+    │   ├── logging-specialist.md
+    │   ├── security-reviewer.md
+    │   └── test-coverage-engineer.md
+    └── README.md
 ```
 
-## Custom Statusline
-
-The `settings.json` wires up a custom statusline via `statusline-command.sh` that surfaces real-time session information directly in the Claude Code UI.
-
-![Claude Code custom statusline](./statusline.png)
-
-**Displays:**
-- Active model name
-- Current project directory
-- Context window usage percentage
-- Estimated session cost (USD)
-- Cumulative input / output tokens
-
-The script handles Windows environments using Git Bash, including fallback `jq` path detection across common install locations (Chocolatey, WinGet, manual installs).
-
-## Agents
-
-| Agent | Purpose |
-|---|---|
-| `api-developer` | RESTful API design, conventions, error handling, and security |
-| `blazor-developer` | Blazor WebAssembly components with MudBlazor |
-| `database-migration-specialist` | Safe DB schema migrations (DbUp, EF Core, FluentMigrator) |
-| `documentation-writer` | Structured Markdown documentation |
-| `feature-flag-remover` | Safely removing deprecated feature flags and their conditional logic |
-| `logging-specialist` | Structured Serilog logging with Application Insights integration |
-| `pr-feedback-evaluator` | Fetches and evaluates GitHub PR review comments for the `resolve-pr-feedback` skill (Sonnet, high effort) |
-| `pr-feedback-implementer` | Implements an already-approved PR feedback plan for the `resolve-pr-feedback` skill (Sonnet, low effort) |
-| `security-reviewer` | OWASP Top 10 security reviews and fixes |
-| `test-coverage-engineer` | xUnit / Shouldly / BUnit / Moq test authoring |
-
-## Skills
+## Plugins
 
 ### `resolve-pr-feedback`
 
 A systematic multi-step workflow for resolving GitHub PR review comments with explicit approval gates before any changes are made. Fetches and evaluates all review threads, presents a verdict table (`ACCEPT` / `PARTLY_ACCEPT` / `PUSHBACK` / `OUTDATED`), and proceeds only after user confirmation at each stage.
 
-## Plugins
-
-This repo also hosts installable Claude Code plugins under `plugins/`, listed in the root `.claude-plugin/marketplace.json`.
-
-### `resolve-pr-feedback`
-
-The same skill as above, packaged as a standalone plugin (`plugins/resolve-pr-feedback/`) with no dependency on any other plugin (aside from a GitHub MCP integration for fetching/resolving PR comments). Install it directly:
-
 ```
-/plugin marketplace add chansonbiltd/personal-claude-setups
 /plugin install resolve-pr-feedback@personal-claude-setups
 ```
 
 See [`plugins/resolve-pr-feedback/README.md`](./plugins/resolve-pr-feedback/README.md) for prerequisites and usage.
 
-## Environment
+### `explore-haiku`
 
-These configs target:
-- **OS:** Windows 11
-- **Shell:** Git Bash
-- **Paths:** Unix-style forward slashes
-- **Encoding:** UTF-8 without BOM
+Overrides Claude Code's built-in `Explore` agent so it always runs on Haiku instead of inheriting the session model, cutting cost and latency on read-only search dispatches without changing behavior.
+
+```
+/plugin install explore-haiku@personal-claude-setups
+```
+
+See [`plugins/explore-haiku/README.md`](./plugins/explore-haiku/README.md) — installing requires a one-time activation step, explained there.
+
+### `dotnet-dev-agents`
+
+Domain-specific subagents for .NET/C# development: API design, Blazor/MudBlazor components, EF Core migrations, Serilog logging, security review, feature-flag removal, xUnit test coverage, and Markdown documentation.
+
+```
+/plugin install dotnet-dev-agents@personal-claude-setups
+```
+
+| Agent | Purpose |
+|---|---|
+| `api-developer` | RESTful API design, conventions, error handling, and security |
+| `blazor-developer` | Blazor components with MudBlazor |
+| `database-migration-specialist` | Safe DB schema migrations (DbUp, EF Core, FluentMigrator) |
+| `documentation-writer` | Structured Markdown documentation |
+| `feature-flag-remover` | Safely removing deprecated feature flags and their conditional logic |
+| `logging-specialist` | Structured Serilog logging with Application Insights integration |
+| `security-reviewer` | OWASP Top 10 security reviews and fixes |
+| `test-coverage-engineer` | xUnit / Shouldly / BUnit / Moq test authoring |
+
+See [`plugins/dotnet-dev-agents/README.md`](./plugins/dotnet-dev-agents/README.md).
 
 ## License
 

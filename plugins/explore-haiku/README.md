@@ -9,7 +9,7 @@ The `Explore` agent does fast, read-only file/symbol lookups. That workload does
 ## Install
 
 ```
-/plugin marketplace add chansonbiltd/personal-claude-setups
+/plugin marketplace add chanson5000/claude-plugin-repository
 /plugin install explore-haiku@personal-claude-setups
 ```
 

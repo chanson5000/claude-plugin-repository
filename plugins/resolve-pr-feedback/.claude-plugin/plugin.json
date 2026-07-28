@@ -5,8 +5,8 @@
   "author": {
     "name": "Cory Hanson"
   },
-  "homepage": "https://github.com/chansonbiltd/personal-claude-setups/tree/main/plugins/resolve-pr-feedback",
-  "repository": "https://github.com/chansonbiltd/personal-claude-setups",
+  "homepage": "https://github.com/chanson5000/claude-plugin-repository/tree/main/plugins/resolve-pr-feedback",
+  "repository": "https://github.com/chanson5000/claude-plugin-repository",
   "license": "MIT",
   "keywords": ["github", "pull-request", "code-review", "git-workflow"]
 }

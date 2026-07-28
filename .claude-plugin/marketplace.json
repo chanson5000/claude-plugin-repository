@@ -10,14 +10,21 @@
       "description": "Systematically fetch, evaluate, and resolve GitHub PR review feedback with explicit human approval gates before any changes are made.",
       "source": "./plugins/resolve-pr-feedback",
       "category": "productivity",
-      "homepage": "https://github.com/chansonbiltd/personal-claude-setups/tree/main/plugins/resolve-pr-feedback"
+      "homepage": "https://github.com/chanson5000/claude-plugin-repository/tree/main/plugins/resolve-pr-feedback"
     },
     {
       "name": "explore-haiku",
       "description": "Overrides Claude Code's built-in Explore agent to always run on Haiku instead of inheriting the session model, keeping everything else the same.",
       "source": "./plugins/explore-haiku",
       "category": "productivity",
-      "homepage": "https://github.com/chansonbiltd/personal-claude-setups/tree/main/plugins/explore-haiku"
+      "homepage": "https://github.com/chanson5000/claude-plugin-repository/tree/main/plugins/explore-haiku"
+    },
+    {
+      "name": "dotnet-dev-agents",
+      "description": "Domain-specific subagents for .NET/C# development: API design, Blazor/MudBlazor components, EF Core migrations, Serilog logging, security review, feature-flag removal, xUnit test coverage, and Markdown documentation.",
+      "source": "./plugins/dotnet-dev-agents",
+      "category": "productivity",
+      "homepage": "https://github.com/chanson5000/claude-plugin-repository/tree/main/plugins/dotnet-dev-agents"
     }
   ]
 }

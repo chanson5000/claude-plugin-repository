@@ -5,8 +5,8 @@
   "author": {
     "name": "Cory Hanson"
   },
-  "homepage": "https://github.com/chansonbiltd/personal-claude-setups/tree/main/plugins/explore-haiku",
-  "repository": "https://github.com/chansonbiltd/personal-claude-setups",
+  "homepage": "https://github.com/chanson5000/claude-plugin-repository/tree/main/plugins/explore-haiku",
+  "repository": "https://github.com/chanson5000/claude-plugin-repository",
   "license": "MIT",
   "keywords": ["agent", "explore", "haiku", "model-override"]
 }
