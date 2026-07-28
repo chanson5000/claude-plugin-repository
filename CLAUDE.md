@@ -21,7 +21,10 @@ Each plugin directory is self-contained:
 - `.claude-plugin/plugin.json` — plugin manifest (name, version, description, author, homepage, repository, license)
 - `agents/*.md` — subagents, if any
 - `skills/<skill-name>/SKILL.md` — skills, if any
+- `hooks/hooks.json` (+ any scripts it invokes) — lifecycle hooks, if any
 - `README.md` — install instructions and usage
+
+Only `.claude-plugin/` sits under that name; `agents/`, `skills/`, and `hooks/` must be at the plugin root. Hook commands reference bundled files via `${CLAUDE_PLUGIN_ROOT}` and persist state under `${CLAUDE_PLUGIN_DATA}` — never hardcode install paths, which change on every plugin update.
 
 ## Working With Plugins
 
@@ -41,6 +44,8 @@ Agent files are markdown with YAML frontmatter (`name`, `description`, `color`, 
 Each skill lives at `plugins/<plugin-name>/skills/<skill-name>/`:
 - `SKILL.md` — the skill entry point; invoked via the `Skill` tool
 - Optional subagent prompt files referenced inside `SKILL.md`
+
+`explore-haiku` writes into user scope (`~/.claude/agents/`), because plugin-scoped agents are namespaced and can't shadow a built-in. Any skill or hook that does this must be non-destructive: write only when the target is absent or byte-matches what the plugin last wrote (tracked in `${CLAUDE_PLUGIN_DATA}`), never clobber a user's own file, and ship a matching deactivation path — uninstalling a plugin does not remove files it placed outside its own directory.
 
 The `resolve-pr-feedback` skill uses an approval-gate pattern: fetch → evaluate → user approval → plan → user approval → implement → diff review → commit/push. Preserve these gates when editing; skipping them is explicitly called out as a red flag in the skill.
 
