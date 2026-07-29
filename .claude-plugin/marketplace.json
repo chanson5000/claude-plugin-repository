@@ -25,6 +25,13 @@
       "source": "./plugins/dotnet-dev",
       "category": "productivity",
       "homepage": "https://github.com/chanson5000/claude-plugin-repository/tree/main/plugins/dotnet-dev"
+    },
+    {
+      "name": "compact-nudge",
+      "description": "Tracks an absolute context-token budget rather than a percentage of the model's window and nudges toward /compact once it is exceeded — so a 1M-context model compacts on the same cadence a 250K one did. Reminds; does not block.",
+      "source": "./plugins/compact-nudge",
+      "category": "productivity",
+      "homepage": "https://github.com/chanson5000/claude-plugin-repository/tree/main/plugins/compact-nudge"
     }
   ]
 }
