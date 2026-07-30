@@ -150,7 +150,7 @@ Start with `/orchestrate`. Seven worker agents form the ladder:
 
 The ladder is separate definitions rather than one configurable agent because the Agent tool can override an agent's `model` at dispatch time but **not** its `effort` — that lives in frontmatter only. `plan-standard` exists because the built-in `Plan` agent inherits the session model, so it would otherwise plan on Opus however ordinary the work is.
 
-An opt-in `SUBAGENT_ORCHESTRATION_STRICT` env var enables a bundled hook that prompts on main-session edits and reminds new sessions of the style; it's inert until set.
+Enforcement is on from install, with no flag to set: a bundled hook injects the doctrine at `SessionStart` and denies main-session edits, so Claude re-routes to a worker instead of asking you to approve each one. `SUBAGENT_ORCHESTRATION_STRICT=ask` softens it to a prompt and `=off` disables it.
 
 See [`plugins/subagent-orchestration/README.md`](./plugins/subagent-orchestration/README.md) for the triage rubric, escalation rules, strict mode, and how it composes with `explore-haiku` and `dotnet-dev`.
 

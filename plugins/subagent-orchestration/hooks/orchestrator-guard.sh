@@ -1,51 +1,86 @@
 #!/bin/sh
-# subagent-orchestration — strict-mode guard.
+# subagent-orchestration — orchestrator guard.
+#
+# ACTIVE BY DEFAULT. Enabling the plugin is the consent: orchestrator mode is the
+# behavior you asked for by installing it, not a flag you then have to remember.
 #
 # Two jobs, selected by $1:
-#   session-start   Print a short orchestrator-mode reminder. SessionStart stdout
-#                   is added to the session's context.
-#   pre-tool-use    On a main-session Edit/Write/NotebookEdit, return an "ask"
-#                   permission decision naming the tier to dispatch instead.
-#                   Tool calls made *inside* a subagent pass through untouched —
-#                   the workers are the ones supposed to be editing.
+#   session-start   Print the orchestrator doctrine. SessionStart stdout is added
+#                   to the session's context, so the essentials hold whether or
+#                   not the `orchestrate` skill gets loaded.
+#   pre-tool-use    On a main-session Edit/Write/NotebookEdit, deny the call and
+#                   tell Claude which tier to dispatch instead. Tool calls made
+#                   *inside* a subagent pass through untouched — the workers are
+#                   the ones supposed to be editing.
 #
-# Inert unless SUBAGENT_ORCHESTRATION_STRICT is set to 1/true/on, so installing the
-# plugin never changes behavior on its own. Set it in settings.json's "env" block
-# or the shell environment; see this plugin's README.
+# Tuning, via SUBAGENT_ORCHESTRATION_STRICT:
+#   unset / on / 1   deny main-session edits, so Claude re-routes to a worker
+#                    without interrupting the user. The default.
+#   ask              prompt the user instead of denying; approving edits in place.
+#   off / 0          fully inert. Nothing is injected, nothing is blocked.
 #
 # Always exits 0. A hook failure must never block session startup or a tool call.
 
 set -u
 
 mode="${1:-}"
+setting="${SUBAGENT_ORCHESTRATION_STRICT:-on}"
 
-case "${SUBAGENT_ORCHESTRATION_STRICT:-}" in
-  1 | true | on | yes) ;;
-  *) exit 0 ;;
+case "$setting" in
+  off | 0 | false | no) exit 0 ;;
 esac
 
 case "$mode" in
   session-start)
     cat <<'EOF'
-Orchestrator mode is active (subagent-orchestration, strict). Triage and dispatch;
-do not read broadly or edit files in this session. Load the `orchestrate` skill for
-the triage rubric and dispatch-brief contract. Lanes: plan-standard, investigate-standard,
-investigate-deep, implement-mechanical, implement-standard, implement-complex, review-critical.
-Main-session edits will prompt for confirmation.
+=== Orchestrator mode is active (subagent-orchestration) ===
+This session is a control plane. Triage and dispatch; do not read broadly or edit
+files here. Editing tools are blocked in the main session by design — that is not a
+malfunction, it is the routing signal. Load the `orchestrate` skill for the full
+triage rubric, escalation protocol, and dispatch-brief contract.
+
+Dispatch as subagent-orchestration:<name>
+  plan-standard         sonnet/medium  sequence multi-step work into tier-scoped briefs
+  investigate-standard  sonnet/medium  how/why code behaves; scope a change
+  investigate-deep      opus/high      diagnosis a cheaper pass could not settle
+  implement-mechanical  haiku/low      fully decided changes, no judgment left
+  implement-standard    sonnet/medium  ordinary work with a pattern to follow
+  implement-complex     opus/high      consequence-heavy or unsettled work
+  review-critical       opus/high      a changeset you are about to commit
+Prefer plan-standard over the built-in Plan, and pass model:haiku to Explore —
+both built-ins inherit the session model and otherwise escape the ladder.
+
+Tier on two questions: is the work decided, or does it still have to be figured out?
+And what does being wrong cost? Escalate on consequence; never re-dispatch the same
+tier on the same failure. Workers never commit — they report, you review the diff.
 EOF
     ;;
 
   pre-tool-use)
-    # `agent_id` is present in the hook payload only for tool calls made inside a
-    # subagent, and absent entirely in the main session. That is the whole gate:
-    # without it, this hook would also block the workers doing the actual work.
-    if grep -q '"agent_id"[[:space:]]*:[[:space:]]*"' 2>/dev/null; then
-      exit 0
-    fi
+    input=$(cat 2>/dev/null || true)
 
-    cat <<'EOF'
-{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"Orchestrator mode: the main session's edit budget is zero. Dispatch subagent-orchestration:implement-mechanical for a fully decided change, implement-standard for ordinary work, or implement-complex when it is consequence-heavy or unsettled. Approve to edit here anyway."}}
-EOF
+    # `agent_id` is present in the payload only for tool calls made inside a
+    # subagent, and absent entirely in the main session. That is the whole gate:
+    # without it this would also block the workers doing the actual work.
+    case "$input" in
+      *'"agent_id"'*) exit 0 ;;
+    esac
+
+    # Scratch space is not project code. Let the orchestrator keep notes.
+    path=$(printf '%s' "$input" | sed -n 's/.*"\(file_path\|notebook_path\)"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\2/p')
+    case "$path" in
+      /tmp/* | /var/folders/*) exit 0 ;;
+    esac
+
+    reason="Orchestrator mode: the main session does not edit files. Dispatch subagent-orchestration:implement-mechanical for a fully decided change, implement-standard for ordinary work with a pattern to follow, or implement-complex when it is consequence-heavy or unsettled. Give the worker the full brief — it has none of this session's context. To edit here anyway, the user can set SUBAGENT_ORCHESTRATION_STRICT=off."
+
+    case "$setting" in
+      ask) decision="ask" ;;
+      *) decision="deny" ;;
+    esac
+
+    printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"%s","permissionDecisionReason":"%s"}}\n' \
+      "$decision" "$reason"
     ;;
 esac
 

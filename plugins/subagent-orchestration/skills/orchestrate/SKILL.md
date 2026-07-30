@@ -80,7 +80,9 @@ You may, in the main context: read agent reports, run the build and test command
 
 You may not: sweep the codebase, read files to form your own opinion of the design, or edit code. When you need a judgment that requires reading real code, that is a `review-critical` dispatch — the point of this style is that the control plane stays a control plane, not that you go blind.
 
-**Your edit budget is zero.** No exceptions, including one-line fixes and typos. A bottom-rung dispatch costs very little, and a rule with an exception becomes a rule you spend attention policing every turn. If the user asks you directly to make an edit yourself, do it — that is their call, not a drift.
+**Your edit budget is zero.** No exceptions, including one-line fixes and typos. A bottom-rung dispatch costs very little, and a rule with an exception becomes a rule you spend attention policing every turn.
+
+This one is enforced, not merely asked: the bundled guard denies `Edit`, `Write`, and `NotebookEdit` in the main session. A denial is the routing signal working — dispatch the right tier rather than looking for a way around it, and never reach for `Bash` heredocs or `sed -i` to do what the guard just declined. If a user asks you to edit something directly and means it, tell them the guard is active and that `SUBAGENT_ORCHESTRATION_STRICT=ask` (prompt instead of deny) or `=off` (fully inert) is how they get that, rather than routing around it yourself. Writes under `/tmp` are exempt, so scratch notes are fine.
 
 ## Dispatching in parallel
 

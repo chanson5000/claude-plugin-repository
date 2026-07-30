@@ -15,7 +15,7 @@ Then start a session with:
 /orchestrate
 ```
 
-Or just tell Claude to work in orchestrator mode — the skill's description triggers on delegation-shaped requests. To make the style persist across sessions without typing anything, see [Strict mode](#strict-mode-opt-in).
+You don't have to, though — the guard is active from the moment the plugin is enabled, and every session starts with the doctrine already in context. `/orchestrate` loads the full rubric, escalation protocol, and brief contract on top of that. See [Enforcement](#enforcement--on-by-default) for how to soften or disable it.
 
 ## Why
 
@@ -89,27 +89,31 @@ Listing it is load-bearing. A `tools` allowlist is strict — a subagent gets *o
 
 **`effort` on Haiku.** Every agent sets `model` and `effort` explicitly, per this repo's convention, so nothing silently inherits the session model. `effort` is a documented frontmatter field and the available levels depend on the model; whether the smallest models act on it is a model-side question, and the field is harmless where unsupported.
 
-**Strict mode covers `Edit`/`Write`, not `Bash`.** Gating `Bash` would fire on every `git` and test command the orchestrator legitimately runs, so a determined `sed -i` in the main session still slips through. The guard raises the floor; it isn't a sandbox.
+**The guard covers `Edit`/`Write`/`NotebookEdit`, not `Bash`.** Gating `Bash` would fire on every `git` and test command the orchestrator legitimately runs, so a determined `sed -i` in the main session still slips through. The skill tells Claude not to route around a denial that way, but that part is guidance again — the guard raises the floor, it isn't a sandbox.
 
 **Not tested end to end.** The agent definitions, manifest, and hook script are validated — the guard's four paths are exercised, and its JSON parses — but no orchestrated task has been run through this plugin yet. Expect to adjust tier boundaries once you've used it on real work.
 
-## Strict mode (opt-in)
+## Enforcement — on by default
 
-The skill sets the orchestrator's edit budget to zero, but a skill is guidance. The bundled hook makes it mechanical, and it is **inert until you turn it on** — installing the plugin never changes behavior by itself:
+Enabling the plugin *is* the consent. There is no flag to remember: orchestrator mode is the behavior you asked for by installing it, and `hooks/orchestrator-guard.sh` holds it in place from the first session.
 
-```json
-{
-  "env": { "SUBAGENT_ORCHESTRATION_STRICT": "1" }
-}
-```
+Plugin hooks run automatically once the plugin is enabled, with no per-session prompt. The guard does two things:
 
-With it set, `hooks/orchestrator-guard.sh` does two things:
+* **`SessionStart`** — injects the doctrine into the session context: the roster with each agent's model and effort, the two triage questions, and the rules that workers never commit and the orchestrator never edits. This is deliberately the full essentials rather than a pointer, because a hook can inject text but cannot force a skill to load — the behavior has to hold even in a session where `orchestrate` is never invoked.
+* **`PreToolUse` on `Edit`/`Write`/`NotebookEdit`** — **denies** main-session edits and returns a reason naming which tier to dispatch instead. Deny rather than prompt is the point: Claude reads the reason and re-routes to a worker on its own, so orchestration happens without stopping to ask you. A prompt on every edit would make *you* the enforcement mechanism.
 
-* **`PreToolUse` on `Edit`/`Write`/`NotebookEdit`** — returns an `ask` permission decision in the main session, with a reason naming which tier to dispatch instead. You can always approve and edit anyway; it's a speed bump aimed at the reflex, not a lock.
-* **`SessionStart`** — prints a short orchestrator-mode reminder into the session context, so the style survives a new session without you remembering to type `/orchestrate`.
+The gate that makes this safe is that the payload carries `agent_id` **only** for tool calls made inside a subagent, and omits it in the main session. `PreToolUse` genuinely does fire for subagent tool calls, so without that check the guard would block the workers doing the actual work. Writes under `/tmp` pass through as well, so scratch notes aren't collateral. The script always exits 0 — a failure can never block startup or a tool call.
 
-The gate that makes this work is that the hook payload carries `agent_id` **only** for tool calls made inside a subagent, and omits it entirely in the main session. `PreToolUse` genuinely does fire for subagent tool calls, so without that check the hook would block the workers doing the actual work — which is why it checks for `agent_id` and exits silently when it's present. The script always exits 0, so a failure can't block startup or a tool call.
+### Tuning it
 
-If you'd rather not use the hook at all, leave the variable unset and add a line to your user `CLAUDE.md` instead — it costs nothing and survives sessions the same way.
+`SUBAGENT_ORCHESTRATION_STRICT` in your settings.json `env` block, if the default isn't what you want:
+
+| Value | Behavior |
+|---|---|
+| unset, `on`, `1` | Deny main-session edits; Claude re-routes to a worker. **Default.** |
+| `ask` | Prompt instead of denying — you can approve and edit in place. |
+| `off`, `0` | Fully inert. Nothing injected, nothing blocked; the agents and skill remain available. |
+
+`ask` is the setting to reach for if you find yourself wanting occasional direct edits without giving up the reminder. `off` is there so a bad day never leaves you fighting your own tooling.
 
 **This style is not always the right one.** A five-minute single-file change does not need a control plane. Reach for it on long sessions, wide codebases, and work whose difficulty genuinely varies task to task.
