@@ -65,7 +65,11 @@ plugins/
     │   ├── implement-standard.md
     │   ├── investigate-deep.md
     │   ├── investigate-standard.md
+    │   ├── plan-standard.md
     │   └── review-critical.md
+    ├── hooks/
+    │   ├── hooks.json
+    │   └── orchestrator-guard.sh
     ├── skills/orchestrate/
     │   ├── SKILL.md
     │   └── references/dispatch-brief.md
@@ -132,10 +136,11 @@ An orchestrator-first development style: the main session triages work and dispa
 /plugin install subagent-orchestration@personal-claude-setups
 ```
 
-Start with `/orchestrate`. Six worker agents form the ladder:
+Start with `/orchestrate`. Seven worker agents form the ladder:
 
 | Agent | Model / effort | Edits? | Dispatch for |
 |---|---|---|---|
+| `plan-standard` | sonnet / medium | No | Sequencing multi-step work into tier-scoped dispatch briefs |
 | `investigate-standard` | sonnet / medium | No | How and why code behaves as it does; scoping a change |
 | `investigate-deep` | opus / high | No | Diagnosis that resisted a cheaper pass — races, corruption, perf |
 | `implement-mechanical` | haiku / low | Yes, no commit | Fully decided changes: stated renames, known call sites |
@@ -143,9 +148,11 @@ Start with `/orchestrate`. Six worker agents form the ladder:
 | `implement-complex` | opus / high | Yes, no commit | Consequence-heavy or unsettled work |
 | `review-critical` | opus / high | No | A changeset about to be committed in expensive-to-break code |
 
-The ladder is six definitions rather than one configurable agent because the Agent tool can override an agent's `model` at dispatch time but **not** its `effort` — that lives in frontmatter only.
+The ladder is separate definitions rather than one configurable agent because the Agent tool can override an agent's `model` at dispatch time but **not** its `effort` — that lives in frontmatter only. `plan-standard` exists because the built-in `Plan` agent inherits the session model, so it would otherwise plan on Opus however ordinary the work is.
 
-See [`plugins/subagent-orchestration/README.md`](./plugins/subagent-orchestration/README.md) for the triage rubric, escalation rules, and how it composes with `explore-haiku` and `dotnet-dev`.
+An opt-in `SUBAGENT_ORCHESTRATION_STRICT` env var enables a bundled hook that prompts on main-session edits and reminds new sessions of the style; it's inert until set.
+
+See [`plugins/subagent-orchestration/README.md`](./plugins/subagent-orchestration/README.md) for the triage rubric, escalation rules, strict mode, and how it composes with `explore-haiku` and `dotnet-dev`.
 
 ## License
 

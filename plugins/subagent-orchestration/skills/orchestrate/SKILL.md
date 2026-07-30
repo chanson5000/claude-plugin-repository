@@ -17,16 +17,18 @@ Plugin agents are namespaced — dispatch as `subagent-orchestration:<name>`.
 
 | Agent | Model / effort | Edits? | Dispatch it for |
 |---|---|---|---|
-| built-in `Explore` | haiku | No | "Where is X", "which files reference Y" — plain location lookups |
+| built-in `Explore` | inherits | No | "Where is X", "which files reference Y" — plain location lookups |
+| `plan-standard` | sonnet / medium | No | Turning multi-step work into sequenced, tier-scoped dispatch briefs |
 | `investigate-standard` | sonnet / medium | No | How and why code behaves as it does; scoping what a change would touch |
-| `investigate-deep` | opus / high | No | Diagnosis that already resisted a cheaper pass: races, corruption, perf, contradictory evidence |
+| `investigate-deep` | opus / high | No | Diagnosis that already resisted a cheaper pass: races, corruption, perf, contradictory evidence; architecture assessment |
 | `implement-mechanical` | haiku / low | Yes | Fully decided changes: stated renames, known call-site edits, dead-branch deletion, pattern-verbatim boilerplate |
 | `implement-standard` | sonnet / medium | Yes | Ordinary features and fixes with clear intent and an existing pattern to follow |
 | `implement-complex` | opus / high | Yes | Consequence-heavy or unsettled work; anything a standard dispatch stalled on |
 | `review-critical` | opus / high | No | A changeset you're about to accept in code where a subtle mistake is expensive |
-| built-in `Plan` | inherits | No | An implementation strategy you need before you can write briefs |
 
-No worker gets the `Agent` tool. Fan-out is your job — a worker that dispatches its own subagents puts decisions somewhere you can't see them.
+Fan-out is structurally yours: Claude Code removes `Agent` from every subagent, so no worker can dispatch its own workers even if you wanted it to. It also removes `AskUserQuestion` — which is why a worker that hits an ambiguity must *report* rather than ask, and why your briefs have to answer questions in advance.
+
+**Both built-ins inherit the session model.** `Explore` has since v2.1.198, and `Plan` always has. So in an Opus session they are the two rungs that escape the ladder: `Explore` costs Opus money for a grep, and `Plan` plans on Opus regardless of how ordinary the work is. Prefer `plan-standard` over built-in `Plan` here. For `Explore`, either pass `model: haiku` at dispatch or install `explore-haiku`, which pins it.
 
 ## Triage
 
@@ -39,7 +41,7 @@ Two questions decide the tier. Ask them in this order, every time.
 |---|---|---|
 | **Fully decided** — every file known, no choices left | `implement-mechanical` | `implement-standard` |
 | **Clear intent** — ordinary judgment inside an existing pattern | `implement-standard` | `implement-complex` |
-| **Undecided** — needs design, or the cause is unknown | investigate first, then re-triage | Do not dispatch. Plan, then bring the decision to the user |
+| **Undecided** — needs design, or the cause is unknown | investigate or plan first, then re-triage | Do not dispatch a writer. Plan, then take the decision to the user |
 
 Signals that a task is **mechanical**: the brief could be executed by careful find-and-replace; you can name every file up front; no new decisions remain.
 
@@ -57,7 +59,11 @@ One attempt per tier. Escalate when a dispatch comes back blocked, ambiguous, st
 
 De-escalate just as deliberately. Investigation tier and implementation tier are independent choices: `investigate-deep` earning a precise diagnosis usually turns the fix mechanical, and it should then go to Haiku, not to Opus because the bug felt hard. Ask the investigator to state which tier its proposed fix needs — it has the context to know.
 
-The Agent tool's `model` parameter overrides an agent's frontmatter model at dispatch time; **effort is not overridable**, which is why the ladder exists as separate definitions. Dispatching `implement-standard` with `model: opus` gives you opus at medium effort — a genuine intermediate rung for briefs that are routine but land in consequence-heavy code.
+The Agent tool's `model` parameter overrides an agent's frontmatter model at dispatch time; **effort is frontmatter-only and cannot be overridden per dispatch**, which is why the ladder exists as separate definitions. Dispatching `implement-standard` with `model: opus` gives you opus at medium effort — a genuine intermediate rung for briefs that are routine but land in consequence-heavy code.
+
+Model resolution runs `CLAUDE_CODE_SUBAGENT_MODEL` → per-dispatch `model` → frontmatter `model` → session model. That first entry outranks everything you do here: set to anything other than `inherit`, it flattens the whole ladder to one model. Check it first if tiers don't seem to be taking effect.
+
+`effort` accepts `low`, `medium`, `high`, `xhigh`, and `max`; available levels depend on the model. This ladder deliberately uses three, so a tier maps to a rung you can hold in your head. Reach for `xhigh` or `max` by editing an agent, not per dispatch — there is no per-dispatch effort parameter to reach for.
 
 ## What you never delegate
 
