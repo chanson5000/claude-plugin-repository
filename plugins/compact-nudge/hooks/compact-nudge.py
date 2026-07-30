@@ -41,14 +41,11 @@ def env_int(name, default, minimum=1):
     return value if value >= minimum else default
 
 
-def context_tokens(transcript_path):
-    """Context size of the most recent main-thread assistant turn, or None."""
-    try:
-        with open(transcript_path, "r", encoding="utf-8", errors="replace") as fh:
-            lines = fh.readlines()
-    except OSError:
-        return None
+TAIL_CHUNK_BYTES = 256 * 1024
+MAX_TAIL_CHUNKS = 8  # ~2MB backward extension cap; a miss just returns None (no nudge that turn).
 
+
+def _find_usage_in_lines(lines):
     for line in reversed(lines):
         line = line.strip()
         if not line:
@@ -76,6 +73,40 @@ def context_tokens(transcript_path):
                 total += value
         if total > 0:
             return total
+    return None
+
+
+def context_tokens(transcript_path):
+    """Context size of the most recent main-thread assistant turn, or None."""
+    try:
+        with open(transcript_path, "rb") as fh:
+            fh.seek(0, os.SEEK_END)
+            file_size = fh.tell()
+
+            for chunk_index in range(1, MAX_TAIL_CHUNKS + 1):
+                read_size = TAIL_CHUNK_BYTES * chunk_index
+                truncated = read_size < file_size
+                fh.seek(max(0, file_size - read_size))
+                data = fh.read()
+                text = data.decode("utf-8", errors="replace")
+                lines = text.splitlines()
+                if truncated and lines:
+                    # First line of the tail is likely a partial line; drop it.
+                    lines = lines[1:]
+
+                result = _find_usage_in_lines(lines)
+                if result is not None:
+                    return result
+
+                if not truncated:
+                    # Already read the whole file; no point extending further.
+                    return None
+    except OSError:
+        return None
+
+    # Exhausted the backward-extension cap without finding a matching entry
+    # (e.g. a long trailing run of sidechain-only entries). Returning None
+    # here just means no nudge this turn, consistent with degrade-silently.
     return None
 
 

@@ -18,7 +18,7 @@ SCRIPT="${CLAUDE_PLUGIN_ROOT}/hooks/compact-nudge.py"
 # candidate by actually running it, so a stub falls through to the real one.
 for candidate in python3 python py; do
     command -v "$candidate" >/dev/null 2>&1 || continue
-    "$candidate" -c "" >/dev/null 2>&1 || continue
+    "$candidate" -c "import sys; sys.exit(0 if sys.version_info[0] >= 3 else 1)" >/dev/null 2>&1 || continue
     exec "$candidate" "$SCRIPT"
 done
 
