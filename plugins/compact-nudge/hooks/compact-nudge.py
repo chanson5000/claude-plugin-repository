@@ -41,42 +41,63 @@ def env_int(name, default, minimum=1):
     return value if value >= minimum else default
 
 
+def _usage_total(entry):
+    """Summed usage for a transcript entry, or None if it isn't a countable turn."""
+    if entry.get("type") != "assistant":
+        return None
+    # Subagent turns carry their own usage against a separate context.
+    if entry.get("isSidechain"):
+        return None
+    usage = (entry.get("message") or {}).get("usage")
+    if not isinstance(usage, dict):
+        return None
+    total = 0
+    for key in (
+        "input_tokens",
+        "cache_read_input_tokens",
+        "cache_creation_input_tokens",
+    ):
+        value = usage.get(key)
+        if isinstance(value, int):
+            total += value
+    return total if total > 0 else None
+
+
 def context_tokens(transcript_path):
-    """Context size of the most recent main-thread assistant turn, or None."""
+    """Context size of the most recent main-thread assistant turn, or None.
+
+    Reads backward from the end of the transcript in growing chunks instead of
+    `readlines()`-ing the whole file: the entry this needs is almost always in
+    the last few lines, and this hook runs on every prompt, so a full read
+    would mean re-scanning an ever-growing transcript each turn.
+    """
     try:
-        with open(transcript_path, "r", encoding="utf-8", errors="replace") as fh:
-            lines = fh.readlines()
+        size = os.path.getsize(transcript_path)
     except OSError:
         return None
 
-    for line in reversed(lines):
-        line = line.strip()
-        if not line:
-            continue
-        try:
-            entry = json.loads(line)
-        except ValueError:
-            continue
-        if entry.get("type") != "assistant":
-            continue
-        # Subagent turns carry their own usage against a separate context.
-        if entry.get("isSidechain"):
-            continue
-        usage = (entry.get("message") or {}).get("usage")
-        if not isinstance(usage, dict):
-            continue
-        total = 0
-        for key in (
-            "input_tokens",
-            "cache_read_input_tokens",
-            "cache_creation_input_tokens",
-        ):
-            value = usage.get(key)
-            if isinstance(value, int):
-                total += value
-        if total > 0:
-            return total
-    return None
+    read_size = min(65536, size)
+    with open(transcript_path, "rb") as fh:
+        while True:
+            fh.seek(size - read_size)
+            chunk = fh.read(read_size)
+            lines = chunk.split(b"\n")
+            if read_size < size:
+                lines = lines[1:]  # first line may be a partial read; drop it
+            for line in reversed(lines):
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    entry = json.loads(line.decode("utf-8", errors="replace"))
+                except ValueError:
+                    continue
+                total = _usage_total(entry)
+                if total is not None:
+                    return total
+            if read_size >= size:
+                return None
+            read_size = min(read_size * 2, size)
 
 
 def message(used, budget, warn_pct):

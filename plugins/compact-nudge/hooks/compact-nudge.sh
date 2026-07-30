@@ -16,9 +16,13 @@ SCRIPT="${CLAUDE_PLUGIN_ROOT}/hooks/compact-nudge.py"
 # `command -v` is not enough on Windows: the Microsoft Store ships a `python3.exe`
 # app-execution-alias stub that resolves but is not an interpreter. Probe each
 # candidate by actually running it, so a stub falls through to the real one.
+# The probe also checks for Python 3 specifically: `python`/`py` can resolve to
+# Python 2, which would otherwise reach compact-nudge.py and fail to even parse
+# it (the script uses Python 3-only syntax), exiting non-zero before the
+# script's own "always exit 0" guarantee ever gets a chance to run.
 for candidate in python3 python py; do
     command -v "$candidate" >/dev/null 2>&1 || continue
-    "$candidate" -c "" >/dev/null 2>&1 || continue
+    "$candidate" -c "import sys; sys.exit(0 if sys.version_info[0] >= 3 else 1)" >/dev/null 2>&1 || continue
     exec "$candidate" "$SCRIPT"
 done
 
