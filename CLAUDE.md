@@ -15,6 +15,7 @@ plugins/
   resolve-pr-feedback/      # Gated multi-step PR review resolution workflow
   explore-haiku/            # Pins the built-in Explore agent to Haiku
   dotnet-dev/               # Skills (authoring conventions) + agents (delegated sweeps) for .NET/C#/Blazor
+  compact-nudge/            # UserPromptSubmit hook nudging toward /compact past an absolute token budget
 ```
 
 Each plugin directory is self-contained:
