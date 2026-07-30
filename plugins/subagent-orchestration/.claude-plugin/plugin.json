@@ -1,0 +1,12 @@
+{
+  "name": "subagent-orchestration",
+  "version": "1.0.0",
+  "description": "An orchestrator-first development style: the main session triages and dispatches, never edits. Ships a ladder of worker agents at fixed model/effort tiers plus the orchestrate skill that carries the triage rubric, escalation protocol, and dispatch-brief contract into the working context.",
+  "author": {
+    "name": "Cory Hanson"
+  },
+  "homepage": "https://github.com/chanson5000/claude-plugin-repository/tree/main/plugins/subagent-orchestration",
+  "repository": "https://github.com/chanson5000/claude-plugin-repository",
+  "license": "MIT",
+  "keywords": ["orchestration", "subagents", "delegation", "model-selection", "effort", "cost"]
+}
