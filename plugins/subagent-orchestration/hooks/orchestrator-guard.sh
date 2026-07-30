@@ -79,6 +79,17 @@ EOF
       *) decision="deny" ;;
     esac
 
+    # JSON-escape the reason before interpolating it. The string above is a
+    # literal that needs none of this today, but an edit introducing a quote or
+    # a backslash would emit invalid JSON — and an unparseable decision is
+    # ignored, so the guard would silently stop enforcing with no signal at all.
+    # Escapes backslashes and double quotes, and folds embedded newlines to \n.
+    reason=$(
+      printf '%s' "$reason" |
+        sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' |
+        awk '{ if (NR > 1) printf "\\n"; printf "%s", $0 }'
+    )
+
     printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"%s","permissionDecisionReason":"%s"}}\n' \
       "$decision" "$reason"
     ;;
