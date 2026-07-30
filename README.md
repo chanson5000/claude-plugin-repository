@@ -40,22 +40,35 @@ plugins/
 │   │   ├── activate-haiku-explore/SKILL.md
 │   │   └── deactivate-haiku-explore/SKILL.md
 │   └── README.md
-└── dotnet-dev/
+├── dotnet-dev/
+│   ├── .claude-plugin/plugin.json
+│   ├── agents/
+│   │   ├── documentation-writer.md
+│   │   ├── feature-flag-remover.md
+│   │   ├── logging-auditor.md
+│   │   └── security-reviewer.md
+│   ├── skills/
+│   │   ├── api-conventions/SKILL.md
+│   │   ├── blazor-components/
+│   │   │   ├── SKILL.md
+│   │   │   └── references/patterns.md
+│   │   ├── db-migrations/SKILL.md
+│   │   ├── remove-feature-flag/SKILL.md
+│   │   ├── serilog-logging/SKILL.md
+│   │   └── test-conventions/SKILL.md
+│   └── README.md
+└── subagent-orchestration/
     ├── .claude-plugin/plugin.json
     ├── agents/
-    │   ├── documentation-writer.md
-    │   ├── feature-flag-remover.md
-    │   ├── logging-auditor.md
-    │   └── security-reviewer.md
-    ├── skills/
-    │   ├── api-conventions/SKILL.md
-    │   ├── blazor-components/
-    │   │   ├── SKILL.md
-    │   │   └── references/patterns.md
-    │   ├── db-migrations/SKILL.md
-    │   ├── remove-feature-flag/SKILL.md
-    │   ├── serilog-logging/SKILL.md
-    │   └── test-conventions/SKILL.md
+    │   ├── implement-complex.md
+    │   ├── implement-mechanical.md
+    │   ├── implement-standard.md
+    │   ├── investigate-deep.md
+    │   ├── investigate-standard.md
+    │   └── review-critical.md
+    ├── skills/orchestrate/
+    │   ├── SKILL.md
+    │   └── references/dispatch-brief.md
     └── README.md
 ```
 
@@ -110,6 +123,29 @@ The split between the two kinds is deliberate: a subagent's prompt exists only i
 > Renamed from `dotnet-dev-agents` in v2.0.0 — uninstall the old plugin before installing this one.
 
 See [`plugins/dotnet-dev/README.md`](./plugins/dotnet-dev/README.md).
+
+### `subagent-orchestration`
+
+An orchestrator-first development style: the main session triages work and dispatches it, and does not read broadly or edit files itself. Cost then tracks task difficulty rather than the session model — a rename runs on Haiku at low effort while a migration runs on Opus at high effort, in the same session.
+
+```
+/plugin install subagent-orchestration@personal-claude-setups
+```
+
+Start with `/orchestrate`. Six worker agents form the ladder:
+
+| Agent | Model / effort | Edits? | Dispatch for |
+|---|---|---|---|
+| `investigate-standard` | sonnet / medium | No | How and why code behaves as it does; scoping a change |
+| `investigate-deep` | opus / high | No | Diagnosis that resisted a cheaper pass — races, corruption, perf |
+| `implement-mechanical` | haiku / low | Yes, no commit | Fully decided changes: stated renames, known call sites |
+| `implement-standard` | sonnet / medium | Yes, no commit | Ordinary features and fixes with a pattern to follow |
+| `implement-complex` | opus / high | Yes, no commit | Consequence-heavy or unsettled work |
+| `review-critical` | opus / high | No | A changeset about to be committed in expensive-to-break code |
+
+The ladder is six definitions rather than one configurable agent because the Agent tool can override an agent's `model` at dispatch time but **not** its `effort` — that lives in frontmatter only.
+
+See [`plugins/subagent-orchestration/README.md`](./plugins/subagent-orchestration/README.md) for the triage rubric, escalation rules, and how it composes with `explore-haiku` and `dotnet-dev`.
 
 ## License
 
