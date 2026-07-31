@@ -1,6 +1,6 @@
 ---
 name: security-reviewer
-description: Use when auditing .NET/Blazor code for security vulnerabilities — authorization gaps, injection, secret handling, data exposure — across a feature, module, or set of changed files. Reports findings; never edits code. Prefer the built-in /security-review for a quick pass over the current diff, and pr-review-toolkit:silent-failure-hunter for error handling specifically; dispatch this agent for a deeper .NET-aware sweep of a whole area.
+description: Use when auditing .NET/Blazor code for security vulnerabilities — authorization gaps, injection, secret handling, data exposure — across a feature, module, or set of changed files. Reports findings; never edits code. Prefer the built-in /security-review for a quick pass over the current diff; dispatch this agent for a deeper .NET-aware sweep of a whole area.
 color: red
 model: opus
 effort: high

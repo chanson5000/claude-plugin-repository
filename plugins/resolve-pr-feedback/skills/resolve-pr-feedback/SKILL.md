@@ -114,7 +114,7 @@ Run `git diff` and present. **Stop.**
 ### 9. Finalize
 1. Stage the approved changes and create a commit with a concise message summarizing which feedback was addressed
 2. `git push`
-3. Batch-resolve GitHub threads via `mcp__plugin_github_github__add_reply_to_pull_request_comment`:
+3. Batch-resolve GitHub threads via your GitHub MCP server's reply-to-review-comment tool (`mcp__<server>__add_reply_to_pull_request_comment` — the server segment depends on the user's MCP configuration), falling back to `gh api` if no GitHub MCP server is available:
    - **ACCEPT**: reply `"Fixed. [brief description]"` → resolve thread
    - **PARTLY_ACCEPT**: reply with what changed and what didn't → resolve thread
    - **PUSHBACK**: post approved reply text → leave thread unresolved **unless reviewer is Copilot** (a bot cannot respond — resolve the thread)
