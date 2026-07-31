@@ -49,15 +49,13 @@ Dispatch explicitly as `dotnet-dev:security-reviewer`, or let Claude Code select
 
 ## Boundaries with other tooling
 
-These overlap with things you may already have installed, so each picks one lane:
+This plugin's agents and skills overlap in purpose with some of Claude Code's built-in commands; here's which to reach for:
 
 | For | Use |
 |---|---|
 | Quick security pass over the current diff | built-in `/security-review` |
-| Error handling and silent failures in a PR | `pr-review-toolkit:silent-failure-hunter` |
-| Whether a PR's test coverage is adequate | `pr-review-toolkit:pr-test-analyzer` |
 | Deep .NET security sweep of a whole area | `dotnet-dev:security-reviewer` |
-| How to write the tests in the first place | `dotnet-dev:test-conventions` |
+| Guidance for authoring new tests | `dotnet-dev:test-conventions` |
 
 ## Project configuration
 
