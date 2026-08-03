@@ -1,7 +1,7 @@
 {
   "name": "resolve-pr-feedback",
-  "version": "1.0.0",
-  "description": "Systematically fetch, evaluate, and resolve GitHub PR review feedback with explicit human approval gates before any changes are made.",
+  "version": "1.1.0",
+  "description": "Systematically fetch, evaluate, and resolve GitHub PR review feedback — gated on human approval by default, or fully autonomous in auto mode, escalating only the calls it isn't sure of.",
   "author": {
     "name": "Cory Hanson"
   },
