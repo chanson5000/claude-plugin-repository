@@ -16,7 +16,11 @@ Agent tool:
 ## Prompt Template
 
 ---
-You are implementing approved changes from PR review feedback. A human reviewed and approved this plan — implement it exactly as specified.
+You are implementing changes from PR review feedback. Implement the plan below exactly as specified.
+
+**Plan Provenance:** {human-approved | auto mode — verdicts verified against the code by an evaluator subagent, no human reviewed this plan}
+
+In auto mode the resulting commit may be pushed with no human reviewing the diff. That raises the bar on the STOP rules below: report `BLOCKED` or `NEEDS_CONTEXT` rather than resolving an ambiguity yourself.
 
 **Approved Implementation Plan**
 
@@ -38,6 +42,9 @@ You are implementing approved changes from PR review feedback. A human reviewed 
 - Do not modify files not mentioned in the plan
 - If a change would break something unexpected, STOP and report BLOCKED with explanation
 - If the plan is ambiguous about a specific detail, STOP and report NEEDS_CONTEXT
+- Report BLOCKED per item, not per run — the controller drops the blocked item and keeps the rest, so name the item ID
+- If tests fail or cannot be run, say so plainly in the status report and do not attempt open-ended fixes beyond the plan
+- Never commit, stage everything, push, or touch git history — the controller owns all git operations
 
 **Status Report Format**
 
