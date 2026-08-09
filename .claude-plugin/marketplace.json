@@ -27,6 +27,13 @@
       "homepage": "https://github.com/chanson5000/claude-plugin-repository/tree/main/plugins/dotnet-dev"
     },
     {
+      "name": "compact-nudge",
+      "description": "Tracks an absolute context-token budget rather than a percentage of the model's window and nudges toward /compact once it is exceeded — so a 1M-context model compacts on the same cadence a 250K one did. Reminds; does not block.",
+      "source": "./plugins/compact-nudge",
+      "category": "productivity",
+      "homepage": "https://github.com/chanson5000/claude-plugin-repository/tree/main/plugins/compact-nudge"
+    },
+    {
       "name": "subagent-orchestration",
       "description": "An orchestrator-first development style: the main session triages and dispatches, never edits. Ships a ladder of worker agents at fixed model/effort tiers — haiku/low through opus/high, across investigate, implement, and review lanes — plus the orchestrate skill carrying the triage rubric, escalation protocol, and dispatch-brief contract.",
       "source": "./plugins/subagent-orchestration",

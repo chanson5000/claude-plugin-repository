@@ -1,0 +1,12 @@
+{
+  "name": "compact-nudge",
+  "version": "1.0.0",
+  "description": "Tracks an absolute context-token budget independent of the model's window and nudges toward /compact once the session exceeds it — so a 1M-context model compacts on the same cadence a 250K one did. Reminds; does not block.",
+  "author": {
+    "name": "Cory Hanson"
+  },
+  "homepage": "https://github.com/chanson5000/claude-plugin-repository/tree/main/plugins/compact-nudge",
+  "repository": "https://github.com/chanson5000/claude-plugin-repository",
+  "license": "MIT",
+  "keywords": ["context", "compact", "cost", "tokens", "hook", "nudge"]
+}
