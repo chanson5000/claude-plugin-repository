@@ -26,7 +26,7 @@ You are evaluating PR review comments for technical correctness. Do NOT implemen
 
 **Your Job**
 
-1. **Fetch comments** using `mcp__plugin_github_github__pull_request_read`:
+1. **Fetch comments** using your GitHub MCP server's pull-request read tool (`mcp__<server>__pull_request_read` — the server segment depends on the user's MCP configuration), falling back to `gh api` if no GitHub MCP server is available:
    - Call with `method: "get_review_comments"` for inline code comments
    - Call with `method: "get_comments"` for general PR comments
    - Filter to unresolved threads only. Note any marked `isOutdated: true`.

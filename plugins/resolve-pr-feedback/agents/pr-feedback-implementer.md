@@ -4,6 +4,7 @@ description: Use when implementing an already-approved PR feedback plan as part 
 color: green
 model: sonnet
 effort: low
+tools: Read, Edit, Write, Grep, Glob, Bash
 ---
 
 # PR Feedback Implementer Agent

@@ -1,6 +1,6 @@
 ---
 name: test-conventions
-description: Use when writing, modifying, or extending xUnit tests, BUnit component tests, or test doubles in a .NET project — covers test naming, assertion library, mocking, and structure rules that differ from common defaults. Load before writing the first test, including a single test added alongside a feature. For judging whether an existing PR's coverage is adequate, use pr-review-toolkit:pr-test-analyzer instead.
+description: Use when writing, modifying, or extending xUnit tests, BUnit component tests, or test doubles in a .NET project — covers test naming, assertion library, mocking, and structure rules that differ from common defaults. Load before writing the first test, including a single test added alongside a feature. Not for judging whether an existing PR's test coverage is adequate.
 ---
 
 # .NET Test Conventions

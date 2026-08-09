@@ -1,6 +1,6 @@
 ---
 name: api-conventions
-description: Use when writing or modifying ASP.NET Core API endpoints, controllers, or the service layer behind them — covers error shape, where validation belongs, authorization attributes, and pagination. Load before adding an endpoint, not after. For auditing an existing endpoint's error handling, use pr-review-toolkit:silent-failure-hunter instead.
+description: Use when writing or modifying ASP.NET Core API endpoints, controllers, or the service layer behind them — covers error shape, where validation belongs, authorization attributes, and pagination. Load before adding an endpoint, not after. Not for auditing an existing endpoint's error handling.
 ---
 
 # ASP.NET Core API Conventions

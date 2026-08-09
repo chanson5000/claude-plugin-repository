@@ -4,6 +4,7 @@ description: Use when fetching and evaluating GitHub PR review comments for tech
 color: yellow
 model: sonnet
 effort: high
+disallowedTools: Write, Edit, NotebookEdit
 ---
 
 # PR Feedback Evaluator Agent

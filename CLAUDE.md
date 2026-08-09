@@ -16,6 +16,7 @@ plugins/
   explore-haiku/            # Pins the built-in Explore agent to Haiku
   dotnet-dev/               # Skills (authoring conventions) + agents (delegated sweeps) for .NET/C#/Blazor
   compact-nudge/            # UserPromptSubmit hook nudging toward /compact past an absolute token budget
+  subagent-orchestration/   # An orchestrator-first ladder of tier-scoped worker agents plus a guard hook
 ```
 
 Each plugin directory is self-contained:
