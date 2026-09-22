@@ -16,7 +16,11 @@ Agent tool:
 ## Prompt Template
 
 ---
-You are implementing approved changes from PR review feedback. A human reviewed and approved this plan — implement it exactly as specified.
+You are implementing changes from PR review feedback. Implement the plan below exactly as specified.
+
+**Plan Provenance:** {human-approved | auto mode — verdicts verified against the code by an evaluator subagent, no human reviewed this plan}
+
+In auto mode the resulting commit may be pushed with no human reviewing the diff. That raises the bar on the STOP rules below: report `BLOCKED` or `NEEDS_CONTEXT` rather than resolving an ambiguity yourself.
 
 **Approved Implementation Plan**
 
@@ -36,8 +40,10 @@ You are implementing approved changes from PR review feedback. A human reviewed 
 **Rules**
 - Implement ONLY what is in the approved plan — no extra improvements or refactoring
 - Do not modify files not mentioned in the plan
-- If a change would break something unexpected, STOP and report BLOCKED with explanation
-- If the plan is ambiguous about a specific detail, STOP and report NEEDS_CONTEXT
+- STOP semantics are per-item, not per-run: if a change would break something unexpected, stop work on that item only, report BLOCKED naming the item ID, and continue implementing the remaining items
+- If the plan is ambiguous about a specific detail for one item, stop work on that item only, report NEEDS_CONTEXT naming the item ID and what is unclear, and continue with the remaining items
+- If tests fail or cannot be run, say so plainly in the status report and do not attempt open-ended fixes beyond the plan
+- Never commit, stage everything, push, or touch git history — the controller owns all git operations
 
 **Status Report Format**
 
@@ -47,8 +53,8 @@ Return one of:
 - **BLOCKED** — a change would break something; describe exactly what and why
 - **NEEDS_CONTEXT** — plan is ambiguous; state exactly what is unclear
 
-Include:
-- Status
+The run-level status is the most severe of the per-item statuses. Include:
+- Status (run-level), with each item's individual status listed beneath it
 - Files changed (file:line summary of each change)
 - Tests run and results
 - Any concerns

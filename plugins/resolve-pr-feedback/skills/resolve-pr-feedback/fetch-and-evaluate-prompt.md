@@ -23,6 +23,7 @@ You are evaluating PR review comments for technical correctness. Do NOT implemen
 - Repo: {REPO}
 - PR Number: {PR_NUMBER}
 - Selective mode (if set): evaluate only comment IDs: {COMMENT_IDS or "all"}
+- Controller mode: {interactive | auto} — in `auto`, everything you mark `confidence: HIGH` with `escalate: false` will be implemented and pushed **without a human ever looking at it**. Calibrate accordingly.
 
 **Your Job**
 
@@ -45,6 +46,10 @@ You are evaluating PR review comments for technical correctness. Do NOT implemen
       - **PARTLY_ACCEPT** — partially correct; specify accepted_part and rejected_part
       - **PUSHBACK** — technically incorrect, breaks things, YAGNI, or reviewer lacks context
       - **OUTDATED** — code has changed since this comment was written (`isOutdated: true` or verified by inspection)
+   d. Assign confidence:
+      - **HIGH** — you read the code and the verdict follows from what it actually does
+      - **LOW** — you could not verify the claim (symbol/file missing, behavior depends on runtime or config, no test proves it), **or** the question has no technically correct answer and comes down to preference
+   e. Set `escalate` and `escalate_reason` — see triggers below
 
 3. **Group related comments** (same file/area, or same theme across files)
 
@@ -62,6 +67,10 @@ GROUPS:
       line: [line number, if inline]
       summary: [1-sentence summary of what reviewer is asking]
       verdict: ACCEPT | PARTLY_ACCEPT | PUSHBACK | OUTDATED
+      confidence: HIGH | LOW
+      escalate: true | false
+      escalate_reason: [trigger number + one phrase, e.g. "3 — naming preference"; omit when false]
+      recommendation: [escalate:true only — the call you would make, and why, in one sentence]
       reasoning: [1-2 sentences of technical justification, cite file:line or grep results]
       accepted_part: [PARTLY_ACCEPT only]
       rejected_part: [PARTLY_ACCEPT only]
@@ -69,6 +78,7 @@ GROUPS:
 CONFLICTS:
 - comment_ids: [id1, id2]
   description: [what contradicts what]
+  recommendation: [which one you'd take and why]
 
 SUMMARY:
   accept_count: N
@@ -76,13 +86,30 @@ SUMMARY:
   pushback_count: N
   outdated_count: N
   conflict_count: N
+  escalate_count: N
 ```
+
+**Escalation Triggers** — set `escalate: true` if ANY apply:
+
+1. `confidence: LOW` — you could not verify the claim against the code
+2. Reviewers conflict on the same code
+3. No technically correct answer — naming, public API shape, UX copy, architectural direction, dependency choice
+4. Blast radius: public API/contract, DB schema or migration, auth/authz/security posture, secrets or config, CI/release pipeline, adding or removing a dependency, deleting or weakening a test
+5. The reviewer asked a **question** rather than requesting a change
+6. Resolving it needs product, business, or roadmap context not in the codebase
+7. `PARTLY_ACCEPT` where the accept/reject split is judgment rather than verified fact
+8. The change is materially larger than this PR's scope (refactor, rewrite, new cross-file abstraction)
+9. A `PUSHBACK` reply would have to assert something you could not verify
+10. Implementing it would require inventing behavior the reviewer never specified
+
+When in doubt, escalate — but always with a `recommendation`. Escalating is asking for a decision, not handing back the problem.
 
 **Critical Rules**
 - VERIFY before categorizing. Read the actual code.
 - If the code described in the comment doesn't match what's in the file, say so in reasoning.
 - YAGNI check: grep for usage before accepting suggestions to add new abstractions or features.
 - Be specific — reference file:line, grep result counts, interface names.
-- If you can't verify something, say so explicitly rather than guessing.
+- If you can't verify something, mark `confidence: LOW` and `escalate: true` — never guess, and never launder a guess as HIGH confidence.
+- `confidence` is about *your evidence*, not about how reasonable the suggestion sounds. A plausible suggestion you didn't verify is LOW.
 - Do NOT implement anything. Return the report only.
 ---
