@@ -43,6 +43,7 @@ digraph resolve_pr_feedback {
     "7a. Implementer status?" [shape=diamond];
     "7b. Drop BLOCKED item, continue" [shape=box];
     "7c. PAUSE: NEEDS_CONTEXT or tests failed" [shape=box style=filled fillcolor=lightyellow];
+    "7d. --stop-before-commit?" [shape=diamond];
     "HALT: no push" [shape=box];
     "8. PAUSE: user reviews git diff" [shape=box style=filled fillcolor=lightyellow];
     "9. commit -> push -> resolve threads" [shape=box style=filled fillcolor=lightgreen];
@@ -65,9 +66,11 @@ digraph resolve_pr_feedback {
     "3b. PAUSE: single escalation checkpoint" -> "5. Build implementation plan";
 
     "7. Dispatch implementer subagent" -> "7a. Implementer status?" [label="auto"];
-    "7a. Implementer status?" -> "9. commit -> push -> resolve threads" [label="DONE / DONE_WITH_CONCERNS"];
+    "7a. Implementer status?" -> "7d. --stop-before-commit?" [label="DONE / DONE_WITH_CONCERNS"];
     "7a. Implementer status?" -> "7b. Drop BLOCKED item, continue" [label="BLOCKED"];
-    "7b. Drop BLOCKED item, continue" -> "9. commit -> push -> resolve threads";
+    "7b. Drop BLOCKED item, continue" -> "7d. --stop-before-commit?";
+    "7d. --stop-before-commit?" -> "8. PAUSE: user reviews git diff" [label="yes"];
+    "7d. --stop-before-commit?" -> "9. commit -> push -> resolve threads" [label="no"];
     "7a. Implementer status?" -> "7c. PAUSE: NEEDS_CONTEXT or tests failed" [label="NEEDS_CONTEXT / tests failed"];
     "7c. PAUSE: NEEDS_CONTEXT or tests failed" -> "HALT: no push";
 
@@ -84,7 +87,7 @@ gh pr view --json number,headRefName,baseRefName,url
 ```
 If no PR exists for the current branch, stop and inform the user.
 
-In auto mode, also capture the starting state — `git status --porcelain` (the **pre-existing dirty set**, recorded so Step 9 can compare it against the files the implementer touched) and the PR's changed-file list (`gh pr diff --name-only`) — so Step 9 can stage precisely and never sweep up pre-existing work. Also capture the repository's actual default branch with `gh repo view --json defaultBranchRef` — note that `baseRefName` from the command above is the PR's target branch, which is not necessarily the repo default.
+In **every mode**, also capture the starting state — `git status --porcelain` (the **pre-existing dirty set**, recorded so Step 9 can compare it against the files the implementer touched) and the PR's changed-file list (`gh pr diff --name-only`) — so Step 9 can stage precisely and never sweep up pre-existing work. Also capture the repository's actual default branch with `gh repo view --json defaultBranchRef` — note that `baseRefName` from the command above is the PR's target branch, which is not necessarily the repo default.
 
 ### 2. Dispatch Fetch-and-Evaluate Subagent
 Use template in `fetch-and-evaluate-prompt.md`. Pass: OWNER, REPO, PR_NUMBER, the active MODE, and if selective mode: comment IDs to evaluate.
@@ -122,7 +125,7 @@ Split the evaluated comments into two buckets:
 - **Autonomous** — verdict is `HIGH` confidence and no escalation trigger fires. Proceed with these without asking.
 - **Escalated** — any trigger below fires. Hold these out of the plan.
 
-If the escalated bucket is **empty, do not pause at all** — go straight to Step 7. That is the point of auto mode.
+If the escalated bucket is **empty, do not pause at all** — go straight to Step 5. That is the point of auto mode.
 
 If it is non-empty, pause **once**, here, for all of them together. Never drip-feed one question per comment. Present:
 
@@ -212,14 +215,16 @@ Present plan and **stop**. User can modify any item.
 ### 7. Dispatch Implementer Subagent
 Use template in `implementer-prompt.md`. Subagent implements approved changes only. **Does not commit.**
 
-### 7a/7b/7c. Handle the Implementer's Status — Auto Mode Only
+### 7a/7b/7c/7d. Handle the Implementer's Status — Auto Mode Only
 
 | Status | Auto-mode action |
 |--------|------------------|
 | `DONE` | Continue to Step 9 without pausing |
 | `DONE_WITH_CONCERNS` | Continue, but state the concern verbatim in your final report |
-| `BLOCKED` | Drop that item from the commit, continue with the rest, and report what was dropped and why |
+| `BLOCKED` | Drop that item from the commit, continue with the rest, report what was dropped and why, and exclude its comment ID from the ACCEPT disposition in Step 9 |
 | `NEEDS_CONTEXT` | Pause and ask — this is the implementer telling you it is guessing |
+
+Under `auto --stop-before-commit`, every row above that says "Continue to Step 9" instead proceeds to **Step 8** and stops for the diff.
 
 Also pause if tests fail or could not be run: never push a red build autonomously. Report the failing test output rather than attempting open-ended fixes.
 
@@ -232,6 +237,8 @@ Run `git diff` and present. **Stop.**
 1. Stage **only** the files the implementer changed (never `git add -A` in auto mode — pre-existing dirty files must stay out) and create a commit with a concise message summarizing which feedback was addressed. Before staging, intersect the implementer-touched files with the pre-existing dirty set captured in Step 1. For any file in both: do **not** stage it — `git add <file>` stages the whole file and cannot exclude the pre-existing hunks — instead pause and report exactly which file collides and ask the user to isolate it. Files with no overlap stage and commit normally.
 2. Before running `git push`, assert that the current branch equals `headRefName` AND is not the repository default branch captured in Step 1; if either check fails, abort the push and ask the user (see the *Hard Floors* section above). `git push` is skipped under `auto --stop-before-push`.
 3. Batch-resolve GitHub threads via your GitHub MCP server's reply-to-review-comment tool (`mcp__<server>__add_reply_to_pull_request_comment` — the server segment depends on the user's MCP configuration), falling back to `gh api` if no GitHub MCP server is available. This step is also skipped under `auto --stop-before-push`:
+
+   Disposition is keyed on the evaluation verdict **and** the implementer's per-item status. Any item dropped as `BLOCKED` at Step 7b does not get a "Fixed." reply — post a reply stating it was not implemented and why, and leave the thread **unresolved** regardless of its original verdict.
    - **ACCEPT**: reply `"Fixed. [brief description]"` → resolve thread
    - **PARTLY_ACCEPT**: reply with what changed and what didn't → resolve thread
    - **PUSHBACK**: post approved reply text → leave thread unresolved **unless reviewer is Copilot** (a bot cannot respond — resolve the thread)
@@ -287,6 +294,7 @@ These thoughts mean you are about to skip a gate that still applies:
 | Staging a file that was already dirty before the run | Compare against the Step 1 dirty set; an overlapping file cannot be staged cleanly — pause and ask |
 | Resolving PUSHBACK threads from humans | Leave open — reviewer must respond |
 | Leaving PUSHBACK threads open when reviewer is Copilot | Copilot is a bot and cannot respond — always resolve its threads after posting reply |
+| Replying "Fixed." to a thread whose item was dropped as BLOCKED | Step 9 keys on implementer status, not just the evaluator verdict |
 | Reading files in controller during evaluation | Delegate entirely to subagent |
 | Accepting all feedback because reviewer is senior | Still verify — seniority doesn't make a suggestion correct for this codebase |
 | Treating "resolve all comments before merge" as "implement all suggestions" | Resolution = disposition, not blind implementation |
