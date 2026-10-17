@@ -1,0 +1,5 @@
+schema_version: "1.1"
+name: feature-following-pattern
+description: Add a new command handler that follows an existing registry pattern, with tests.
+context:
+  scaffold_script: fixture.sh

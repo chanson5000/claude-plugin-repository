@@ -1,0 +1,5 @@
+schema_version: "1.1"
+name: bug-unknown-cause
+description: Failing report test whose root cause is an off-by-one in a different module (pagination helper).
+context:
+  scaffold_script: fixture.sh

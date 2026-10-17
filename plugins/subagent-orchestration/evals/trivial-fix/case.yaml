@@ -1,0 +1,5 @@
+schema_version: "1.1"
+name: trivial-fix
+description: One-word typo in a user-facing error message. Overhead control case; the plugin is expected not to help.
+context:
+  scaffold_script: fixture.sh

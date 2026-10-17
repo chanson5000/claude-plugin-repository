@@ -1,0 +1,5 @@
+schema_version: "1.1"
+name: mechanical-rename
+description: Fully decided rename of a function across modules, tests, and a string reference.
+context:
+  scaffold_script: fixture.sh
