@@ -2,11 +2,16 @@
 
 A subagent starts cold. It has no session history, has not seen what the user asked for, does not know what the last dispatch found, and cannot ask you a question mid-flight. Every dispatch is a self-contained work order, and the quality of the brief is the single biggest lever on whether a cheap tier succeeds.
 
-Most tier escalations are really brief failures. Before promoting a stalled task to a bigger model, check whether the brief actually contained what the worker needed.
+Most escalations are really brief failures. Before raising a stalled task to a bigger model or higher effort, check whether the brief actually contained what the worker needed.
+
+Model and effort are not part of the brief. They go in the Agent tool's `model` and `effort` parameters, so the brief is the same whichever tier runs it.
 
 ## Template
 
 ```
+MODE (implementer only)
+mechanical | standard | complex — how much judgment the worker may exercise.
+
 GOAL
 One sentence, stated as an outcome. Not "look at the auth middleware" —
 "make expired sessions return 401 instead of 500 on the refresh endpoint."
@@ -33,18 +38,28 @@ VERIFY WITH
 The exact build and test command for this repo.
 
 REPORT
-What you need back: files changed, judgment calls, test output verbatim,
-anything left undone.
+What you need back, and how short: files changed, judgment calls, failing
+test output, anything left undone. The report lands in the orchestrator's
+context, so ask for the shape you'll act on, not a narrative.
 
 If anything above is ambiguous or the change turns out to be larger than this
 brief describes, stop and report it rather than guessing.
 ```
 
-Not every dispatch needs all eight sections — a mechanical rename may only need GOAL, FILES, VERIFY WITH, and the stop-and-report line. Drop sections that would be empty; never drop the stop-and-report line.
+Not every dispatch needs every section — a mechanical rename may only need MODE, GOAL, FILES, VERIFY WITH, and the stop-and-report line. Drop sections that would be empty; never drop the stop-and-report line.
+
+## Following up
+
+A resumed worker (`SendMessage` to its agent ID) already holds the original brief and everything it read. Its follow-up message needs only the delta: what was missing or wrong, and the new definition of done. Don't restate the brief; do state the change in scope plainly, so its report can be checked against it.
 
 ## Worked example — mechanical
 
+Dispatched as `subagent-orchestration:implementer`, `model: haiku`, `effort: low`.
+
 ```
+MODE
+mechanical
+
 GOAL
 Rename ICustomerRepo to ICustomerRepository across the solution, including
 the implementation, all injection sites, and tests.
@@ -74,7 +89,12 @@ adapting it.
 
 ## Worked example — standard, following a diagnosis
 
+Dispatched as `subagent-orchestration:implementer`, `model: sonnet`, `effort: medium`.
+
 ```
+MODE
+standard
+
 GOAL
 Fix the 500 on POST /api/orders/{id}/refund when the order has already been
 refunded; it must return 409 with the existing ProblemDetails shape.
@@ -124,4 +144,4 @@ picking one.
 
 Compare the report against the brief before doing anything else — specifically the file list and the definition of done. Scope drift in either direction is the finding: work that was asked for and is missing, and work that appeared and was not asked for.
 
-Then verify rather than trust: run the build and test command yourself, and `git diff --stat` to confirm the changeset matches the files the brief named. If the report claims a green suite and the suite is red, that is the whole result — re-dispatch or escalate, and do not carry the claim forward into a commit message.
+Then verify rather than trust: run the build and test command yourself, and `git diff --stat` to confirm the changeset matches the files the brief named. If the report claims a green suite and the suite is red, that is the whole result. Resume the worker with the failure if the gap is small, or escalate if it isn't, and don't carry the claim forward into a commit message.

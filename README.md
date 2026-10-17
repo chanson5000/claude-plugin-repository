@@ -60,13 +60,10 @@ plugins/
 └── subagent-orchestration/
     ├── .claude-plugin/plugin.json
     ├── agents/
-    │   ├── implement-complex.md
-    │   ├── implement-mechanical.md
-    │   ├── implement-standard.md
-    │   ├── investigate-deep.md
-    │   ├── investigate-standard.md
-    │   ├── plan-standard.md
-    │   └── review-critical.md
+    │   ├── implementer.md
+    │   ├── investigator.md
+    │   ├── planner.md
+    │   └── reviewer.md
     ├── hooks/
     │   ├── hooks.json
     │   └── orchestrator-guard.sh
@@ -130,29 +127,26 @@ See [`plugins/dotnet-dev/README.md`](./plugins/dotnet-dev/README.md).
 
 ### `subagent-orchestration`
 
-An orchestrator-first development style: the main session triages work and dispatches it, and does not read broadly or edit files itself. Cost then tracks task difficulty rather than the session model — a rename runs on Haiku at low effort while a migration runs on Opus at high effort, in the same session.
+An orchestrator-first development style: the main session triages work and dispatches it, and does not read broadly or edit files itself. The orchestrator picks each dispatch's model and effort, so cost tracks task difficulty rather than the session model — a rename runs on Haiku at low effort while a migration runs on Opus at high effort, in the same session.
 
 ```
 /plugin install subagent-orchestration@personal-claude-setups
 ```
 
-Start with `/orchestrate`. Seven worker agents form the ladder:
+Start with `/orchestrate`. Four agents, one per job, none with a fixed tier:
 
-| Agent | Model / effort | Edits? | Dispatch for |
-|---|---|---|---|
-| `plan-standard` | sonnet / medium | No | Sequencing multi-step work into tier-scoped dispatch briefs |
-| `investigate-standard` | sonnet / medium | No | How and why code behaves as it does; scoping a change |
-| `investigate-deep` | opus / high | No | Diagnosis that resisted a cheaper pass — races, corruption, perf |
-| `implement-mechanical` | haiku / low | Yes, no commit | Fully decided changes: stated renames, known call sites |
-| `implement-standard` | sonnet / medium | Yes, no commit | Ordinary features and fixes with a pattern to follow |
-| `implement-complex` | opus / high | Yes, no commit | Consequence-heavy or unsettled work |
-| `review-critical` | opus / high | No | A changeset about to be committed in expensive-to-break code |
+| Agent | Edits? | Dispatch for |
+|---|---|---|
+| `planner` | No | Sequencing multi-step work into dispatch briefs |
+| `investigator` | No | How and why code behaves; scoping a change; root-cause diagnosis |
+| `implementer` | Yes, no commit | Any decided change, with `MODE` mechanical, standard, or complex |
+| `reviewer` | No | A changeset about to be accepted in expensive-to-break code |
 
-The ladder is separate definitions rather than one configurable agent because the Agent tool can override an agent's `model` at dispatch time but **not** its `effort` — that lives in frontmatter only. `plan-standard` exists because the built-in `Plan` agent inherits the session model, so it would otherwise plan on Opus however ordinary the work is.
+Medium effort is the default; effort is capped at `xhigh`, and a bundled hook denies `max`. Requires Claude Code v2.1.292+ for the Agent tool's per-dispatch `effort`.
 
 Enforcement is on from install, with no flag to set: a bundled hook injects the doctrine at `SessionStart` and denies main-session edits, so Claude re-routes to a worker instead of asking you to approve each one. `SUBAGENT_ORCHESTRATION_STRICT=ask` softens it to a prompt and `=off` disables it.
 
-See [`plugins/subagent-orchestration/README.md`](./plugins/subagent-orchestration/README.md) for the triage rubric, escalation rules, strict mode, and how it composes with `explore-haiku` and `dotnet-dev`.
+See [`plugins/subagent-orchestration/README.md`](./plugins/subagent-orchestration/README.md) for the model/effort table, escalation rules, strict mode, and how it composes with `explore-haiku` and `dotnet-dev`.
 
 ## License
 

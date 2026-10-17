@@ -20,6 +20,15 @@
             "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/orchestrator-guard.sh\" pre-tool-use"
           }
         ]
+      },
+      {
+        "matcher": "Agent|Task|Workflow",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/orchestrator-guard.sh\" pre-dispatch"
+          }
+        ]
       }
     ]
   }

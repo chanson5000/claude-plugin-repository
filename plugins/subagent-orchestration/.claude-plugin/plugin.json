@@ -1,7 +1,7 @@
 {
   "name": "subagent-orchestration",
-  "version": "1.0.0",
-  "description": "An orchestrator-first development style: the main session triages and dispatches, never edits. Ships a ladder of worker agents at fixed model/effort tiers — haiku/low through opus/high, across investigate, implement, and review lanes — plus the orchestrate skill carrying the triage rubric, escalation protocol, and dispatch-brief contract.",
+  "version": "2.0.0",
+  "description": "An orchestrator-first development style: the main session triages and dispatches, never edits, choosing each dispatch's model and effort. Ships four role agents (planner, investigator, implementer, reviewer) with no fixed tier, the orchestrate skill carrying the model/effort table, escalation protocol, and dispatch-brief contract, and a guard hook that blocks main-session edits and max-effort dispatches.",
   "author": {
     "name": "Cory Hanson"
   },
