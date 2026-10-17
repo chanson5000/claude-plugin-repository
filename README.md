@@ -142,7 +142,7 @@ Start with `/orchestrate`. Four agents, one per job, none with a fixed tier:
 | `implementer` | Yes, no commit | Any decided change, with `MODE` mechanical, standard, or complex |
 | `reviewer` | No | A changeset about to be accepted in expensive-to-break code |
 
-Medium effort is the default; effort is capped at `xhigh`, and a bundled hook denies `max`. Requires Claude Code v2.1.292+ for the Agent tool's per-dispatch `effort`.
+Medium effort is the default; effort is capped at `high`, and a bundled hook denies `xhigh` and `max`. Requires Claude Code v2.1.292+ for the Agent tool's per-dispatch `effort`.
 
 Enforcement is on from install, with no flag to set: a bundled hook injects the doctrine at `SessionStart` and denies main-session edits, so Claude re-routes to a worker instead of asking you to approve each one. `SUBAGENT_ORCHESTRATION_STRICT=ask` softens it to a prompt and `=off` disables it.
 

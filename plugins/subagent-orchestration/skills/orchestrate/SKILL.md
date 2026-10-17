@@ -23,7 +23,7 @@ Four agents, one per job. Plugin agents are namespaced — dispatch as `subagent
 | `implementer` | Yes, never commits | Any decided change. State `MODE: mechanical`, `standard`, or `complex` in the brief |
 | `reviewer` | No | A changeset you are about to accept where a subtle mistake is expensive |
 
-Prefer `planner` over built-in `Plan`: `Plan` inherits the session model and returns prose rather than briefs. Built-in `Explore` also runs on the session model or the Opus alias unless told otherwise, so always pass it `model: haiku`.
+Prefer `planner` over built-in `Plan`: `Plan` inherits the session model and returns prose rather than briefs. Built-in `Explore` inherits the session model too (Opus in an Opus session), so always pass it `model: haiku`.
 
 ## Choosing model and effort
 
@@ -43,7 +43,7 @@ Pass both on every dispatch. The Agent tool's `model` and `effort` parameters ov
 
 **Medium is the default effort.** Move off it only for a reason you could state: `low` for work with no decisions left, `high` for consequence-heavy or already-stalled work.
 
-**Allowed effort levels are `low`, `medium`, `high`, and `xhigh`. Never `max`.** `xhigh` is for a diagnosis or implementation that `high` already failed on, not a first attempt. The bundled guard denies any dispatch, or Workflow script, that asks for `max`. Don't start ultracode-scale Workflow fan-outs from an orchestrated session either. Each worker is already a deliberate, sized dispatch, and a workflow multiplies that past the budget this style exists to protect.
+**Allowed effort levels are `low`, `medium`, and `high`. Never `xhigh` or `max`.** When a dispatch stalls, a bigger model is a better lever than more effort on the same one. When opus / high stalls, the cause is almost always the brief or a decision nobody has made, and more thinking doesn't fix either. Fix the brief, investigate, or take the question to the user. The bundled guard denies any dispatch, or Workflow script, that asks for `xhigh` or `max`. Don't start ultracode-scale Workflow fan-outs from an orchestrated session either. Each worker is already a deliberate, sized dispatch, and a workflow multiplies that past the budget this style exists to protect.
 
 ## Triage
 
@@ -68,7 +68,7 @@ When the two questions disagree, follow consequence. Tier down on cost, never on
 
 **A correction in the same scope continues the same worker.** If a worker comes back with a small gap — a missed call site, a test to add, a question the brief should have answered — resume it with `SendMessage` to its agent ID. It keeps its context and doesn't re-read everything, which costs far less than a fresh dispatch. A resumed worker keeps its original model and effort.
 
-**A wall means a new dispatch, one step up.** When a dispatch comes back blocked, still failing, or holding a design question, raise the model first (haiku → sonnet → opus), then the effort. Pass what the lower dispatch established. Never re-dispatch fresh at the same model and effort with a reworded brief: it spends a full cold start relearning the same wall, and a half-success leaves two changesets to reconcile.
+**A wall means a new dispatch, one step up.** When a dispatch comes back blocked, still failing, or holding a design question, raise the model first (haiku → sonnet → opus), then the effort, up to `high`. Pass what the lower dispatch established. Past opus / high there is no next rung: re-scope the brief or take the decision to the user. Never re-dispatch fresh at the same model and effort with a reworded brief: it spends a full cold start relearning the same wall, and a half-success leaves two changesets to reconcile.
 
 **De-escalate just as deliberately.** Investigation and implementation are independent choices. An opus/high diagnosis usually turns the fix mechanical, so the fix goes to haiku/low. Ask the investigator which MODE, model, and effort its proposed fix needs.
 
@@ -111,7 +111,7 @@ The short version: every brief carries the goal as an outcome, the `MODE` for im
 | "This is one line, I'll just edit it" | Edit budget is zero. An implementer at haiku/low costs almost nothing. |
 | "Let me read the file first to write a better brief" | That is the fan-out you're avoiding. Dispatch an investigator, or name the file and let the worker read it. |
 | "I'll leave model and effort off, the default is fine" | The defaults are a fallback. Choosing per dispatch is the whole point. |
-| "This one is important, give it max" | `max` is off the table. Raise the model before the effort, and `xhigh` only after `high` failed. |
+| "This one is important, give it xhigh" | Effort tops out at `high`. Raise the model instead; past opus / high, fix the brief. |
 | "It failed, let me try again with a clearer prompt" | Same model and effort on the same wall. Continue the worker if the gap is small; otherwise go up a step. |
 | "The agent said tests pass" | Run them. |
 | "This bug was hard, so the fix needs Opus" | Different question. A precise diagnosis usually makes the fix mechanical. |

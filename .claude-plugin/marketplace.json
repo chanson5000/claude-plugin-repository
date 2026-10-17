@@ -28,7 +28,7 @@
     },
     {
       "name": "subagent-orchestration",
-      "description": "An orchestrator-first development style: the main session triages and dispatches, never edits, choosing each dispatch's model and effort. Ships four role agents (planner, investigator, implementer, reviewer) with no fixed tier, the orchestrate skill carrying the model/effort table, escalation protocol, and dispatch-brief contract, and a guard hook that blocks main-session edits and max-effort dispatches.",
+      "description": "An orchestrator-first development style: the main session triages and dispatches, never edits, choosing each dispatch's model and effort. Ships four role agents (planner, investigator, implementer, reviewer) with no fixed tier, the orchestrate skill carrying the model/effort table, escalation protocol, and dispatch-brief contract, and a guard hook that blocks main-session edits and xhigh/max-effort dispatches.",
       "source": "./plugins/subagent-orchestration",
       "category": "productivity",
       "homepage": "https://github.com/chanson5000/claude-plugin-repository/tree/main/plugins/subagent-orchestration"

@@ -38,7 +38,7 @@ Four agents, one per job. None has a fixed tier: the orchestrator passes `model`
 | `implementer` | Yes, never commits | Any decided change. The brief states `MODE: mechanical`, `standard`, or `complex` |
 | `reviewer` | No | A changeset about to be accepted where a subtle mistake is expensive |
 
-Built-in `Explore` covers plain "where is X" lookups, always dispatched with `model: haiku`. On subscription and Console accounts it otherwise runs on the Opus alias. `planner` replaces the built-in `Plan`, which inherits the session model and returns prose rather than briefs.
+Built-in `Explore` covers plain "where is X" lookups, always dispatched with `model: haiku`. Otherwise it inherits the session model, so an Opus session greps on Opus. (If the session runs Fable, subscription and Console accounts drop Explore to the Opus alias.) `planner` replaces the built-in `Plan`, which inherits the session model and returns prose rather than briefs.
 
 Frontmatter defaults are sonnet / medium (opus / medium for `reviewer`). They apply only when a dispatch omits the parameters.
 
@@ -54,7 +54,7 @@ Two questions, in this order: **is the work decided, or does it still have to be
 
 Expensive means auth, money, migrations, concurrency, public contracts, deleting anything not provably dead, or behavior a user can observe changing.
 
-**Medium is the default effort.** `low` is for work with no decisions left; `high` is for consequence-heavy or stalled work. **Effort is capped at `xhigh`, and `xhigh` is only for work `high` already failed on.** `max` is never used for subagents, and the guard denies any Agent or Workflow call that asks for it. The skill also tells the orchestrator not to launch ultracode-scale Workflow fan-outs.
+**Medium is the default effort.** `low` is for work with no decisions left; `high` is for consequence-heavy or stalled work. **Effort is capped at `high`.** When work stalls, a bigger model is a better lever than more effort, and when opus / high stalls the cause is almost always the brief or an unmade decision. The guard denies any Agent or Workflow call that asks for `xhigh` or `max`. The skill also tells the orchestrator not to launch ultracode-scale Workflow fan-outs.
 
 Model and effort move independently. `implementer` at opus / medium is a real rung for briefs that are routine in shape but land in consequence-heavy code.
 
@@ -104,7 +104,7 @@ Enabling the plugin *is* the consent. Plugin hooks run automatically once the pl
 
 * **`SessionStart`** — injects the doctrine: the four agents, the default model/effort per kind of work, the effort cap, and the rules that workers never commit and the orchestrator never edits. A hook can inject text but cannot force a skill to load, so the essentials have to hold even when `orchestrate` is never invoked.
 * **`PreToolUse` on `Edit`/`Write`/`NotebookEdit`** — **denies** main-session edits and returns a reason telling Claude to dispatch the implementer. Deny rather than prompt is the point: Claude reads the reason and re-routes on its own.
-* **`PreToolUse` on `Agent`/`Workflow`** — denies any dispatch or Workflow script that asks for `max` effort, including nested dispatches.
+* **`PreToolUse` on `Agent`/`Workflow`** — denies any dispatch or Workflow script that asks for `xhigh` or `max` effort, including nested dispatches.
 
 The edit gate relies on the payload carrying a top-level `agent_id` key for tool calls made inside a subagent. `PreToolUse` fires for subagent tool calls too, so without that check the guard would block the workers. The match is on the key itself, so file content that merely mentions it doesn't open the gate. Writes under `/tmp` pass through for scratch notes, unless the path contains `..`. The script always exits 0, so a failure can never block startup or a tool call.
 
@@ -114,8 +114,8 @@ The edit gate relies on the payload carrying a top-level `agent_id` key for tool
 
 | Value | Behavior |
 |---|---|
-| unset, `on`, `1` | Deny main-session edits and `max` effort. **Default.** |
-| `ask` | Prompt instead of denying edits. `max` effort is still denied. |
+| unset, `on`, `1` | Deny main-session edits and `xhigh`/`max` effort. **Default.** |
+| `ask` | Prompt instead of denying edits. `xhigh`/`max` effort is still denied. |
 | `off`, `0` | Fully inert. Nothing injected, nothing blocked; the agents and skill remain available. |
 
 ### An alternative it doesn't use

@@ -12,14 +12,15 @@
 #                   tell Claude to dispatch the implementer instead. Tool calls
 #                   made *inside* a subagent pass through untouched — the workers
 #                   are the ones supposed to be editing.
-#   pre-dispatch    On an Agent or Workflow call that asks for `max` effort, deny
-#                   it. Subagent effort tops out at xhigh. Applies wherever the
+#   pre-dispatch    On an Agent or Workflow call that asks for `xhigh` or `max`
+#                   effort, deny it. Subagent effort tops out at high: past that,
+#                   a bigger model is the better lever. Applies wherever the
 #                   call comes from, including a nested dispatch.
 #
 # Tuning, via SUBAGENT_ORCHESTRATION_STRICT:
 #   unset / on / 1   deny main-session edits, so Claude re-routes to a worker
 #                    without interrupting the user. The default.
-#   ask              prompt the user instead of denying edits. `max` effort is
+#   ask              prompt the user instead of denying edits. xhigh/max are
 #                    still denied.
 #   off / 0          fully inert. Nothing is injected, nothing is blocked.
 #
@@ -66,8 +67,8 @@ Dispatch as subagent-orchestration:<name>, and pass `model` and `effort` every t
   Explore       built-in; plain "where is X" lookups, always with model haiku
 
 Default haiku/low for mechanical work, sonnet/medium for ordinary work, opus/high
-for consequence-heavy or stalled work. Effort is low, medium, high, or xhigh —
-never max (the guard denies it). Never use fork; don't pass `name`.
+for consequence-heavy or stalled work. Effort is low, medium, or high — never
+xhigh or max (the guard denies them). Never use fork; don't pass `name`.
 
 Tier on two questions: is the work decided, or does it still have to be figured
 out? And what does being wrong cost? Continue a worker with SendMessage for a small
@@ -104,13 +105,13 @@ EOF
   pre-dispatch)
     input=$(cat 2>/dev/null || true)
 
-    # Agent: a top-level "effort":"max" key in tool_input. Quotes inside the
-    # prompt text are JSON-escaped, so a brief that mentions effort can't match.
-    # Workflow: the script is one JSON string, so look for effort: 'max' or
-    # effort: \"max\" inside it.
-    if printf '%s' "$input" | grep -Eq '"effort"[[:space:]]*:[[:space:]]*"max"' ||
-       printf '%s' "$input" | grep -Eq "effort[[:space:]]*:[[:space:]]*(\\\\\"|')max(\\\\\"|')"; then
-      decide deny "Orchestrator mode: max effort is not allowed for subagents. Use low, medium, high, or xhigh. If high already failed, raise the model before the effort, and reach for xhigh only after that."
+    # Agent: a top-level "effort":"xhigh"/"max" key in tool_input. Quotes inside
+    # the prompt text are JSON-escaped, so a brief that mentions effort can't
+    # match. Workflow: the script is one JSON string, so look for
+    # effort: 'max' or effort: \"max\" (and xhigh) inside it.
+    if printf '%s' "$input" | grep -Eq '"effort"[[:space:]]*:[[:space:]]*"(xhigh|max)"' ||
+       printf '%s' "$input" | grep -Eq "effort[[:space:]]*:[[:space:]]*(\\\\\"|')(xhigh|max)(\\\\\"|')"; then
+      decide deny "Orchestrator mode: subagent effort tops out at high. Use low, medium, or high. If a dispatch stalled, raise the model instead; if opus/high stalled, fix the brief, investigate, or take the decision to the user."
     fi
     ;;
 esac
