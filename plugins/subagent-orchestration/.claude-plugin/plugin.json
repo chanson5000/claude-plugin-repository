@@ -1,7 +1,7 @@
 {
   "name": "subagent-orchestration",
   "version": "2.0.0",
-  "description": "An orchestrator-first development style: the main session triages and dispatches, never edits, choosing each dispatch's model and effort. Ships four role agents (planner, investigator, implementer, reviewer) with no fixed tier, the orchestrate skill carrying the model/effort table, escalation protocol, and dispatch-brief contract, and a guard hook that blocks main-session edits and xhigh/max-effort dispatches.",
+  "description": "An orchestrator-first development style: the main session triages and delegates by default, choosing each dispatch's model and effort, while keeping its full toolset. Ships four role agents (planner, investigator, implementer, reviewer) with no fixed tier, the orchestrate skill carrying the model/effort table, escalation protocol, and dispatch-brief contract, and a hook that injects the doctrine and denies xhigh/max-effort dispatches.",
   "author": {
     "name": "Cory Hanson"
   },

@@ -127,7 +127,7 @@ See [`plugins/dotnet-dev/README.md`](./plugins/dotnet-dev/README.md).
 
 ### `subagent-orchestration`
 
-An orchestrator-first development style: the main session triages work and dispatches it, and does not read broadly or edit files itself. The orchestrator picks each dispatch's model and effort, so cost tracks task difficulty rather than the session model — a rename runs on Haiku at low effort while a migration runs on Opus at high effort, in the same session.
+An orchestrator-first development style: the main session triages work and dispatches it, and by default delegates the reading, searching, and writing to subagents. The orchestrator picks each dispatch's model and effort, so cost tracks task difficulty rather than the session model — a rename runs on Haiku at low effort while a migration runs on Opus at high effort, in the same session.
 
 ```
 /plugin install subagent-orchestration@personal-claude-setups
@@ -144,9 +144,9 @@ Start with `/orchestrate`. Four agents, one per job, none with a fixed tier:
 
 Medium effort is the default; effort is capped at `high`, and a bundled hook denies `xhigh` and `max`. Requires Claude Code v2.1.292+ for the Agent tool's per-dispatch `effort`.
 
-Enforcement is on from install, with no flag to set: a bundled hook injects the doctrine at `SessionStart` and denies main-session edits, so Claude re-routes to a worker instead of asking you to approve each one. `SUBAGENT_ORCHESTRATION_STRICT=ask` softens it to a prompt and `=off` disables it.
+Delegation is a strong default, not a restriction: the main session keeps every tool and decides when doing something itself is cheaper. A bundled hook injects the doctrine at `SessionStart`; `SUBAGENT_ORCHESTRATION=off` disables it.
 
-See [`plugins/subagent-orchestration/README.md`](./plugins/subagent-orchestration/README.md) for the model/effort table, escalation rules, strict mode, and how it composes with `explore-haiku` and `dotnet-dev`.
+See [`plugins/subagent-orchestration/README.md`](./plugins/subagent-orchestration/README.md) for the model/effort table, escalation rules, and how it composes with `explore-haiku` and `dotnet-dev`.
 
 ## License
 

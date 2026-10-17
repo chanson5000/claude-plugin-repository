@@ -32,5 +32,3 @@ First line, exactly one of:
 * **REJECT** — blocking problems, each with `file:line`, the concrete failure, and the smallest correction.
 
 Separate *confirmed* problems from *needs verification*. Rank by consequence. Don't invent marginal findings to look thorough.
-</content>
-</invoke>

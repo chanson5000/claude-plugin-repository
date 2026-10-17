@@ -42,5 +42,3 @@ Your report lands in the orchestrator's context. Keep it to the plan.
 * Risks mapped to the step that carries them, and anything you couldn't determine.
 
 If the work is small enough that a plan adds nothing, say so and give the single brief instead.
-</content>
-</invoke>

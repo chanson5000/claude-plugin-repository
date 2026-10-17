@@ -15,7 +15,7 @@ Then start a session with:
 /orchestrate
 ```
 
-You don't have to, though. The guard is active from the moment the plugin is enabled, and every session starts with the doctrine already in context. `/orchestrate` adds the full model/effort table, the escalation protocol, and the brief contract. See [Enforcement](#enforcement--on-by-default) for how to soften or disable it.
+You don't have to, though. Every session starts with the doctrine already in context, and `/orchestrate` adds the full model/effort table, the escalation protocol, and the brief contract. See [What the hook does](#what-the-hook-does) for how to turn it off.
 
 ## Why
 
@@ -90,40 +90,23 @@ Model and effort move independently. `implementer` at opus / medium is a real ru
 
 **Requires per-dispatch effort.** The Agent tool's `effort` parameter arrived in Claude Code v2.1.292. On older versions every dispatch runs at the agent's frontmatter effort (medium).
 
-**Dispatch overhead is real.** Every fresh dispatch pays for a cold start. Batching matters: one brief covering five call sites beats five micro-dispatches. For a genuinely trivial change the overhead can exceed the work, and the skill still says dispatch it, because a rule with an exception costs more attention to police than the exception saves. If you want a one-line fix done in the main session, ask for it directly.
+**Dispatch overhead is real.** Every fresh dispatch pays for a cold start. Batching matters: one brief covering five call sites beats five micro-dispatches. For a genuinely small change whose context is already in hand, the overhead can exceed the work, and the skill leaves that call to the orchestrator.
 
-**The guard covers `Edit`/`Write`/`NotebookEdit`, not `Bash`.** Gating `Bash` would fire on every `git` and test command the orchestrator legitimately runs, so a determined `sed -i` still slips through. The skill tells Claude not to route around a denial that way, but that part is guidance: the guard raises the floor; it isn't a sandbox.
+**Delegation is guidance, not enforcement.** Nothing blocks the main session from reading, searching, or editing; it keeps every tool. The doctrine and skill make delegation the strong default, and the orchestrator decides when doing something itself is plainly cheaper. If you find it drifting into doing everything itself on long sessions, that is the place to tighten the skill's wording.
 
 **Read-only agents keep `Bash`.** The investigator, planner, and reviewer need it for `git log`, `rg`, and running tests, so "read-only" means no edit tools, enforced, plus an instruction not to change state with `Bash`.
 
-**Not tested end to end.** The agent definitions, manifest, and hook script are validated, and the guard's paths are exercised with crafted payloads. But no orchestrated task has been run through this version yet. Expect to adjust the defaults once you've used it on real work.
+**Not tested end to end.** The agent definitions, manifest, and hook script are validated, and the effort cap is exercised with crafted payloads. But no orchestrated task has been run through this version yet. Expect to adjust the defaults once you've used it on real work.
 
-## Enforcement — on by default
+## What the hook does
 
-Enabling the plugin *is* the consent. Plugin hooks run automatically once the plugin is enabled, with no per-session prompt. `hooks/orchestrator-guard.sh` does three things:
+Plugin hooks run automatically once the plugin is enabled, with no per-session prompt. `hooks/orchestrator-guard.sh` does two things, and neither takes a tool away from the main session:
 
-* **`SessionStart`** — injects the doctrine: the four agents, the default model/effort per kind of work, the effort cap, and the rules that workers never commit and the orchestrator never edits. A hook can inject text but cannot force a skill to load, so the essentials have to hold even when `orchestrate` is never invoked.
-* **`PreToolUse` on `Edit`/`Write`/`NotebookEdit`** — **denies** main-session edits and returns a reason telling Claude to dispatch the implementer. Deny rather than prompt is the point: Claude reads the reason and re-routes on its own.
-* **`PreToolUse` on `Agent`/`Workflow`** — denies any dispatch or Workflow script that asks for `xhigh` or `max` effort, including nested dispatches.
+* **`SessionStart`** — injects the doctrine: delegation as the default, the four agents, the default model/effort per kind of work, the effort cap, and the rule that workers never commit. A hook can inject text but cannot force a skill to load, so the essentials have to hold even when `orchestrate` is never invoked.
+* **`PreToolUse` on `Agent`/`Workflow`** — denies any dispatch or Workflow script that asks for `xhigh` or `max` effort, including nested dispatches. The denial reason tells Claude to raise the model instead, so it re-dispatches rather than stalling.
 
-The edit gate relies on the payload carrying a top-level `agent_id` key for tool calls made inside a subagent. `PreToolUse` fires for subagent tool calls too, so without that check the guard would block the workers. The match is on the key itself, so file content that merely mentions it doesn't open the gate. Writes under `/tmp` pass through for scratch notes, unless the path contains `..`. The script always exits 0, so a failure can never block startup or a tool call.
+The effort match is on the parameter itself, so a brief that merely mentions an effort level in its text passes. The script always exits 0, so a failure can never block startup or a tool call.
 
-### Tuning it
-
-`SUBAGENT_ORCHESTRATION_STRICT` in your settings.json `env` block:
-
-| Value | Behavior |
-|---|---|
-| unset, `on`, `1` | Deny main-session edits and `xhigh`/`max` effort. **Default.** |
-| `ask` | Prompt instead of denying edits. `xhigh`/`max` effort is still denied. |
-| `off`, `0` | Fully inert. Nothing injected, nothing blocked; the agents and skill remain available. |
-
-### An alternative it doesn't use
-
-Claude Code can run the main session *as* a named agent (`claude --agent`, or `"agent"` in a plugin's `settings.json`), which would let an orchestrator agent simply omit `Edit` and `Write`. This plugin doesn't ship that, because the agent's prompt replaces the default Claude Code system prompt entirely and applies to every session while the plugin is enabled. That's a far larger change than a hook that denies three tools.
+Set `SUBAGENT_ORCHESTRATION=off` (or `0`) in your settings.json `env` block to make the hook fully inert: nothing injected, nothing denied. The agents and skill remain available.
 
 **This style is not always the right one.** A five-minute single-file change does not need a control plane. Reach for it on long sessions, wide codebases, and work whose difficulty genuinely varies task to task.
-</content>
-</invoke>
-<invoke name="Bash">
-<parameter name="command">cd /home/user/claude-plugin-repository && sed -n 55,70p README.md && sed -n 128,160p README.md

@@ -53,5 +53,3 @@ Your report lands in the orchestrator's context, which it keeps small on purpose
 * Judgment calls and why; for `complex`, the approach and the rejected alternative.
 * Build and test results stated plainly, with the failing output if anything is red. A red suite reported as green is the worst outcome available to you.
 * What you did not do, and any decision you are handing back.
-</content>
-</invoke>

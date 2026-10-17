@@ -15,7 +15,7 @@ plugins/
   resolve-pr-feedback/      # Gated multi-step PR review resolution workflow
   explore-haiku/            # Pins the built-in Explore agent to Haiku
   dotnet-dev/               # Skills (authoring conventions) + agents (delegated sweeps) for .NET/C#/Blazor
-  subagent-orchestration/   # Orchestrator-first: role agents dispatched at a chosen model/effort, plus a guard hook
+  subagent-orchestration/   # Orchestrator-first: role agents dispatched at a chosen model/effort, plus a doctrine/effort-cap hook
 ```
 
 Each plugin directory is self-contained:

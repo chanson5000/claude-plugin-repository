@@ -38,5 +38,3 @@ Your report lands in the orchestrator's context, which it keeps small on purpose
 * What you ruled out, briefly, so the caller doesn't re-tread it.
 
 If the answer is "the code does not do that anywhere", say it in one line and stop.
-</content>
-</invoke>

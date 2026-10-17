@@ -1,13 +1,15 @@
 ---
 name: orchestrate
-description: Use when working in orchestrator mode — the main session triages and dispatches work to subagents, choosing each dispatch's model and effort, and does not read broadly or edit files itself. Load it at the start of a session the user wants run this way, when the user asks to orchestrate/delegate/dispatch rather than implement directly, and before choosing a model and effort for a dispatch. Carries the triage rubric, the model/effort table, the escalation protocol, and the dispatch-brief contract.
+description: Use when working in orchestrator mode — the main session triages and dispatches work to subagents, choosing each dispatch's model and effort, and keeps broad reading, searching, and writing out of its own context by default. Load it at the start of a session the user wants run this way, when the user asks to orchestrate/delegate/dispatch rather than implement directly, and before choosing a model and effort for a dispatch. Carries the triage rubric, the model/effort table, the escalation protocol, and the dispatch-brief contract.
 ---
 
 # Orchestrate
 
 ## Core principle
 
-**The main context is a control plane, not a worker.** You triage, dispatch, verify, integrate, and talk to the user. The reading, searching, and writing happen inside subagents, at a model and effort you chose for that specific piece of work.
+**The main context is a control plane by default.** You triage, dispatch, verify, integrate, and talk to the user. The reading, searching, and writing happen inside subagents, at a model and effort you chose for that specific piece of work.
+
+This is a strong default, not a prohibition. You keep every tool, and nothing blocks you from doing work here. Use that judgment in the direction of delegating: the cost of drifting into doing everything yourself is invisible turn by turn and large by hour three.
 
 This buys three things. Your context stays small, so long sessions don't degrade. Cost tracks difficulty instead of session model: a rename runs on Haiku at low effort while a migration runs on Opus at high effort, in the same session. And independent work runs concurrently in the background while you keep triaging.
 
@@ -90,13 +92,21 @@ When the two questions disagree, follow consequence. Tier down on cost, never on
 * **Git that touches shared or destructive state.** Staging, committing, pushing, resetting, rebasing, branch deletion. Workers report; you commit.
 * **Anything the user asked you personally to confirm.**
 
-## Your verification budget
+## When to do it yourself
 
-A report is a claim. You may, in the main context: read agent reports, run the build and test commands, run `git diff --stat` and `git diff` on work you commissioned, and read a single small file to arbitrate between two contradicting reports.
+Delegate unless doing it here is plainly cheaper *and* keeps your context clean. In practice that means work where you already hold everything it needs:
 
-You may not sweep the codebase, read files to form your own opinion of the design, or edit code. A judgment that needs real code reading is a `reviewer` dispatch.
+* A small edit to a file whose relevant lines are already in your context, where writing the brief would take longer than the edit.
+* Follow-through on work you're integrating: a commit message, resolving a trivial conflict between two workers' diffs, fixing a typo a reviewer pointed at.
+* A single targeted read or command whose output is short and that decides your next dispatch.
 
-**Your edit budget is zero.** No exceptions, including typos — an `implementer` at haiku/low costs very little, and a rule with an exception is a rule you police every turn. The bundled guard denies `Edit`, `Write`, and `NotebookEdit` in the main session. A denial is the routing signal working: dispatch rather than reaching for `Bash` heredocs or `sed -i`. If the user wants a direct edit and means it, tell them `SUBAGENT_ORCHESTRATION_STRICT=ask` (prompt instead of deny) or `=off` (fully inert) is how they get it. Writes under `/tmp` are exempt for scratch notes.
+Delegate when any of these hold: you'd need to search or read more than a file or two to do it; it touches several files; it's consequence-heavy (auth, money, migrations, concurrency, public contracts), where a fresh worker and a review are worth the cost; or a cheaper model could do it just as well and the session is going to run long.
+
+If you notice yourself three or four reads deep into something, stop and dispatch the rest with what you've learned in the brief.
+
+## Verifying reports
+
+A report is a claim. Run the build and test commands yourself, and check `git diff --stat` against the brief's file list. When a judgment needs real code reading — is this changeset correct, is this design sound — prefer a `reviewer` dispatch over reading the code here.
 
 ## Writing the brief
 
@@ -108,7 +118,7 @@ The short version: every brief carries the goal as an outcome, the `MODE` for im
 
 | Thought | Reality |
 |---|---|
-| "This is one line, I'll just edit it" | Edit budget is zero. An implementer at haiku/low costs almost nothing. |
+| "I'll just do this part myself, I'm already here" | Fine for something small with the context in hand. Three or four reads in, it wasn't small — dispatch the rest. |
 | "Let me read the file first to write a better brief" | That is the fan-out you're avoiding. Dispatch an investigator, or name the file and let the worker read it. |
 | "I'll leave model and effort off, the default is fine" | The defaults are a fallback. Choosing per dispatch is the whole point. |
 | "This one is important, give it xhigh" | Effort tops out at `high`. Raise the model instead; past opus / high, fix the brief. |
@@ -129,7 +139,3 @@ The short version: every brief carries the goal as an outcome, the `MODE` for im
 | Reading the codebase to check a worker's reasoning | Dispatch `reviewer`. Keep your context clean. |
 | Opus/high as a first-pass investigation | Start with `Explore` on haiku or `investigator` on sonnet; reserve opus/high for what those couldn't settle. |
 | Asking the user to decide something you can decide | Routing is your job. Only genuine product and risk decisions go up. |
-</content>
-</invoke>
-<invoke name="Bash">
-<parameter name="command">cd /home/user/claude-plugin-repository/plugins/subagent-orchestration && grep -n "investigat\|implement-\|dotnet test\|^REPORT\|^GOAL" skills/orchestrate/references/dispatch-brief.md | head -40
