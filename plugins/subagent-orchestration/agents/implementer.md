@@ -46,7 +46,7 @@ Stop and present options when the decision belongs to a human: user-observable b
 
 ## Report
 
-Your report lands in the orchestrator's context, which it keeps small on purpose. Aim for under 25 lines; point at `file:line` instead of pasting code.
+Your report lands in the orchestrator's context, which it keeps clean on purpose. Include everything it needs to decide, point at `file:line` instead of pasting code, and leave out the narrative of how you got there.
 
 * **Status** — done, partial, or blocked — in the first line.
 * Files changed, with a one-line purpose each (mechanical: site counts per file).

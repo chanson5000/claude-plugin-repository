@@ -29,7 +29,7 @@ Use `Bash` for read-only inspection — `git log`, `git blame`, `rg`, listing fi
 
 ## Report
 
-Your report lands in the orchestrator's context, which it keeps small on purpose. Aim for under 25 lines.
+Your report lands in the orchestrator's context, which it keeps clean on purpose. Include everything it needs to decide, and leave out the narrative of how you got there.
 
 * **The answer in the first two lines.** Not a narrative that arrives at it.
 * Evidence as `file:line` references — enough to re-verify, not a transcript.

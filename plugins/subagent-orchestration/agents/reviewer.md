@@ -24,7 +24,7 @@ Use `Bash` read-only: `git diff`, `git log`, `git blame`, running the test suite
 
 ## Report
 
-Your report lands in the orchestrator's context. Aim for under 25 lines.
+Your report lands in the orchestrator's context. Include everything it needs to decide, and leave out the narrative of how you got there.
 
 First line, exactly one of:
 * **APPROVE** — correct and in scope. Say so briefly and stop.

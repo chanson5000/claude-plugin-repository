@@ -72,7 +72,7 @@ Model and effort move independently. `implementer` at opus / medium is a real ru
 * **No `name` on dispatches.** With agent teams enabled, a named dispatch becomes a teammate.
 * **Background, not polling.** Independent dispatches go out in one message. The orchestrator waits for notifications and never reads a worker's transcript, since that would pour the worker's context into its own.
 * **Writers parallelize only on disjoint file sets**, or with `isolation: worktree`.
-* **Short reports.** Every agent is told its report lands in the orchestrator's context and to aim for under 25 lines with `file:line` pointers.
+* **Decision-ready reports.** Every agent is told its report lands in the orchestrator's context: include what the orchestrator needs to decide, point at `file:line` rather than pasting code, and skip the narrative. There's no length cap, so a worker never trims a detail that mattered.
 
 ## Composing with other plugins
 
